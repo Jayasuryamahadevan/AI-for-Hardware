@@ -1,0 +1,1561 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 876 571" width="876" height="571" font-family="Menlo, Consolas, 'DejaVu Sans Mono', monospace">
+<rect x="0" y="0" width="876" height="571" rx="10" fill="#1e1f29"/>
+<rect x="0" y="0" width="876" height="44" rx="10" fill="#2b2d3a"/>
+<rect x="0" y="34" width="876" height="10" fill="#2b2d3a"/>
+<circle cx="24" cy="22.0" r="6" fill="#ff6b6b"/>
+<circle cx="44" cy="22.0" r="6" fill="#f8c555"/>
+<circle cx="64" cy="22.0" r="6" fill="#57e389"/>
+<text x="438.0" y="27.0" fill="#8a8d9f" font-size="13" text-anchor="middle">labbench — any AI model, any instrument</text>
+<g opacity="0">
+<animate attributeName="opacity" values="1;1;0;0" keyTimes="0.000000;0.027820;0.028820;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#57e389" font-size="14" font-weight="bold" xml:space="preserve">$ labbench devices -c configs/simulated-lab.yaml</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.026820;0.027820;0.033384;0.034384;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#57e389" font-size="14" font-weight="bold" xml:space="preserve">$ labbench devices -c configs/simulated-lab.yaml</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">simulated-lab  autonomy 3 (BOUNDED), ceiling sample</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">  scope1 [SIM]  Widefield Microscope</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">    kind    microscope   state idle</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.032384;0.033384;0.038948;0.039948;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#57e389" font-size="14" font-weight="bold" xml:space="preserve">$ labbench devices -c configs/simulated-lab.yaml</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">simulated-lab  autonomy 3 (BOUNDED), ceiling sample</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">  scope1 [SIM]  Widefield Microscope</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">    kind    microscope   state idle</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">    Camera             snap, acquire_tile</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">    FocusControl       move_z, autofocus</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">    Illumination       set_channel, set_intensity, open_shutter, close_shutter</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">    MotionControl      home, move_absolute, move_relative</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.037948;0.038948;0.044512;0.045512;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#57e389" font-size="14" font-weight="bold" xml:space="preserve">$ labbench devices -c configs/simulated-lab.yaml</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">simulated-lab  autonomy 3 (BOUNDED), ceiling sample</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">  scope1 [SIM]  Widefield Microscope</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">    kind    microscope   state idle</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">    Camera             snap, acquire_tile</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">    FocusControl       move_z, autofocus</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">    Illumination       set_channel, set_intensity, open_shutter, close_shutter</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">    MotionControl      home, move_absolute, move_relative</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">    ObjectiveTurret    set_objective</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">  reader1 [SIM]  Multi-Mode Plate Reader</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">    kind    plate_reader   state idle</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.043512;0.044512;0.050076;0.051076;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#57e389" font-size="14" font-weight="bold" xml:space="preserve">$ labbench devices -c configs/simulated-lab.yaml</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">simulated-lab  autonomy 3 (BOUNDED), ceiling sample</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">  scope1 [SIM]  Widefield Microscope</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">    kind    microscope   state idle</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">    Camera             snap, acquire_tile</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">    FocusControl       move_z, autofocus</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">    Illumination       set_channel, set_intensity, open_shutter, close_shutter</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">    MotionControl      home, move_absolute, move_relative</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">    ObjectiveTurret    set_objective</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">  reader1 [SIM]  Multi-Mode Plate Reader</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">    kind    plate_reader   state idle</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">    PlateTransport     open_drawer, close_drawer, load_plate, eject_plate</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">    Reader             read_absorbance, read_fluorescence, read_kinetic</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">    Shaker             shake</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">    TemperatureControl set_temperature</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.049076;0.050076;0.055640;0.056640;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#57e389" font-size="14" font-weight="bold" xml:space="preserve">$ labbench devices -c configs/simulated-lab.yaml</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">simulated-lab  autonomy 3 (BOUNDED), ceiling sample</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">  scope1 [SIM]  Widefield Microscope</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">    kind    microscope   state idle</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">    Camera             snap, acquire_tile</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">    FocusControl       move_z, autofocus</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">    Illumination       set_channel, set_intensity, open_shutter, close_shutter</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">    MotionControl      home, move_absolute, move_relative</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">    ObjectiveTurret    set_objective</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">  reader1 [SIM]  Multi-Mode Plate Reader</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">    kind    plate_reader   state idle</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">    PlateTransport     open_drawer, close_drawer, load_plate, eject_plate</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">    Reader             read_absorbance, read_fluorescence, read_kinetic</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">    Shaker             shake</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">    TemperatureControl set_temperature</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">  handler1 [SIM]  8-Channel Liquid Handler</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">    kind    liquid_handler   state idle</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">    Labware            create_plate, inspect_plate</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.054640;0.055640;0.061204;0.062204;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#57e389" font-size="14" font-weight="bold" xml:space="preserve">$ labbench devices -c configs/simulated-lab.yaml</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">simulated-lab  autonomy 3 (BOUNDED), ceiling sample</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">  scope1 [SIM]  Widefield Microscope</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">    kind    microscope   state idle</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">    Camera             snap, acquire_tile</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">    FocusControl       move_z, autofocus</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">    Illumination       set_channel, set_intensity, open_shutter, close_shutter</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">    MotionControl      home, move_absolute, move_relative</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">    ObjectiveTurret    set_objective</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">  reader1 [SIM]  Multi-Mode Plate Reader</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">    kind    plate_reader   state idle</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">    PlateTransport     open_drawer, close_drawer, load_plate, eject_plate</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">    Reader             read_absorbance, read_fluorescence, read_kinetic</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">    Shaker             shake</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">    TemperatureControl set_temperature</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">  handler1 [SIM]  8-Channel Liquid Handler</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">    kind    liquid_handler   state idle</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">    Labware            create_plate, inspect_plate</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">    Pipette            aspirate, dispense, transfer, mix</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">    TipManagement      pick_up_tips, drop_tips</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">  incubator1 [SIM]  CO2 Incubator</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.060204;0.061204;0.192716;0.193716;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">  scope1 [SIM]  Widefield Microscope</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">    kind    microscope   state idle</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">    Camera             snap, acquire_tile</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">    FocusControl       move_z, autofocus</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">    Illumination       set_channel, set_intensity, open_shutter, close_shutter</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">    MotionControl      home, move_absolute, move_relative</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">    ObjectiveTurret    set_objective</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">  reader1 [SIM]  Multi-Mode Plate Reader</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">    kind    plate_reader   state idle</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">    PlateTransport     open_drawer, close_drawer, load_plate, eject_plate</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">    Reader             read_absorbance, read_fluorescence, read_kinetic</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">    Shaker             shake</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">    TemperatureControl set_temperature</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">  handler1 [SIM]  8-Channel Liquid Handler</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">    kind    liquid_handler   state idle</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">    Labware            create_plate, inspect_plate</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">    Pipette            aspirate, dispense, transfer, mix</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">    TipManagement      pick_up_tips, drop_tips</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">  incubator1 [SIM]  CO2 Incubator</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">    kind    incubator   state idle</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">    GasControl         set_co2, set_humidity</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">    PlateStorage       open_door, close_door, store_plate, retrieve_plate</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">    TemperatureControl set_temperature, wait_for_setpoint</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.191716;0.192716;0.220536;0.221536;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">  scope1 [SIM]  Widefield Microscope</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">    kind    microscope   state idle</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">    Camera             snap, acquire_tile</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">    FocusControl       move_z, autofocus</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">    Illumination       set_channel, set_intensity, open_shutter, close_shutter</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">    MotionControl      home, move_absolute, move_relative</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">    ObjectiveTurret    set_objective</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">  reader1 [SIM]  Multi-Mode Plate Reader</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">    kind    plate_reader   state idle</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">    PlateTransport     open_drawer, close_drawer, load_plate, eject_plate</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">    Reader             read_absorbance, read_fluorescence, read_kinetic</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">    Shaker             shake</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">    TemperatureControl set_temperature</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">  handler1 [SIM]  8-Channel Liquid Handler</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">    kind    liquid_handler   state idle</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">    Labware            create_plate, inspect_plate</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">    Pipette            aspirate, dispense, transfer, mix</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">    TipManagement      pick_up_tips, drop_tips</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">  incubator1 [SIM]  CO2 Incubator</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">    kind    incubator   state idle</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">    GasControl         set_co2, set_humidity</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">    PlateStorage       open_door, close_door, store_plate, retrieve_plate</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">    TemperatureControl set_temperature, wait_for_setpoint</text>
+<text x="18" y="553" fill="#57e389" font-size="14" font-weight="bold" xml:space="preserve">$ labbench experiment run -c configs/simulated-lab.yaml quick-image.yaml</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.219536;0.220536;0.226100;0.227100;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">    Illumination       set_channel, set_intensity, open_shutter, close_shutter</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">    MotionControl      home, move_absolute, move_relative</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">    ObjectiveTurret    set_objective</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">  reader1 [SIM]  Multi-Mode Plate Reader</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">    kind    plate_reader   state idle</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">    PlateTransport     open_drawer, close_drawer, load_plate, eject_plate</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">    Reader             read_absorbance, read_fluorescence, read_kinetic</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">    Shaker             shake</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">    TemperatureControl set_temperature</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">  handler1 [SIM]  8-Channel Liquid Handler</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">    kind    liquid_handler   state idle</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">    Labware            create_plate, inspect_plate</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">    Pipette            aspirate, dispense, transfer, mix</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">    TipManagement      pick_up_tips, drop_tips</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">  incubator1 [SIM]  CO2 Incubator</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">    kind    incubator   state idle</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">    GasControl         set_co2, set_humidity</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">    PlateStorage       open_door, close_door, store_plate, retrieve_plate</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">    TemperatureControl set_temperature, wait_for_setpoint</text>
+<text x="18" y="477" fill="#57e389" font-size="14" font-weight="bold" xml:space="preserve">$ labbench experiment run -c configs/simulated-lab.yaml quick-image.yaml</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">{</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">  "run_id": "run_40413dbe2a77",</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">  "protocol": "quick-image",</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">  "status": "succeeded",</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.225100;0.226100;0.231664;0.232664;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">  reader1 [SIM]  Multi-Mode Plate Reader</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">    kind    plate_reader   state idle</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">    PlateTransport     open_drawer, close_drawer, load_plate, eject_plate</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">    Reader             read_absorbance, read_fluorescence, read_kinetic</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">    Shaker             shake</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">    TemperatureControl set_temperature</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">  handler1 [SIM]  8-Channel Liquid Handler</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">    kind    liquid_handler   state idle</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">    Labware            create_plate, inspect_plate</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">    Pipette            aspirate, dispense, transfer, mix</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">    TipManagement      pick_up_tips, drop_tips</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">  incubator1 [SIM]  CO2 Incubator</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">    kind    incubator   state idle</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">    GasControl         set_co2, set_humidity</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">    PlateStorage       open_door, close_door, store_plate, retrieve_plate</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">    TemperatureControl set_temperature, wait_for_setpoint</text>
+<text x="18" y="401" fill="#57e389" font-size="14" font-weight="bold" xml:space="preserve">$ labbench experiment run -c configs/simulated-lab.yaml quick-image.yaml</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">{</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">  "run_id": "run_40413dbe2a77",</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">  "protocol": "quick-image",</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">  "status": "succeeded",</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">  "current_step": 1,</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">  "total_steps": 2,</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">  "elapsed_s": 0.23,</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">  "message": "completed",</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.230664;0.231664;0.237228;0.238228;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">    Shaker             shake</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">    TemperatureControl set_temperature</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">  handler1 [SIM]  8-Channel Liquid Handler</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">    kind    liquid_handler   state idle</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">    Labware            create_plate, inspect_plate</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">    Pipette            aspirate, dispense, transfer, mix</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">    TipManagement      pick_up_tips, drop_tips</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">  incubator1 [SIM]  CO2 Incubator</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">    kind    incubator   state idle</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">    GasControl         set_co2, set_humidity</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">    PlateStorage       open_door, close_door, store_plate, retrieve_plate</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">    TemperatureControl set_temperature, wait_for_setpoint</text>
+<text x="18" y="325" fill="#57e389" font-size="14" font-weight="bold" xml:space="preserve">$ labbench experiment run -c configs/simulated-lab.yaml quick-image.yaml</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">{</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">  "run_id": "run_40413dbe2a77",</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">  "protocol": "quick-image",</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">  "status": "succeeded",</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">  "current_step": 1,</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">  "total_steps": 2,</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">  "elapsed_s": 0.23,</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">  "message": "completed",</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">  "steps": [</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">    {</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">      "label": "home",</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">      "index": 0,</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.236228;0.237228;0.242792;0.243792;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">    kind    liquid_handler   state idle</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">    Labware            create_plate, inspect_plate</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">    Pipette            aspirate, dispense, transfer, mix</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">    TipManagement      pick_up_tips, drop_tips</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">  incubator1 [SIM]  CO2 Incubator</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">    kind    incubator   state idle</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">    GasControl         set_co2, set_humidity</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">    PlateStorage       open_door, close_door, store_plate, retrieve_plate</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">    TemperatureControl set_temperature, wait_for_setpoint</text>
+<text x="18" y="249" fill="#57e389" font-size="14" font-weight="bold" xml:space="preserve">$ labbench experiment run -c configs/simulated-lab.yaml quick-image.yaml</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">{</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">  "run_id": "run_40413dbe2a77",</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">  "protocol": "quick-image",</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">  "status": "succeeded",</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">  "current_step": 1,</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">  "total_steps": 2,</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">  "elapsed_s": 0.23,</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">  "message": "completed",</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">  "steps": [</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">    {</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">      "label": "home",</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">      "index": 0,</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">      "device": "scope1",</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">      "feature": "MotionControl",</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">      "command": "home",</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">      "status": "succeeded",</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.241792;0.242792;0.248356;0.249356;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">  incubator1 [SIM]  CO2 Incubator</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">    kind    incubator   state idle</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">    GasControl         set_co2, set_humidity</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">    PlateStorage       open_door, close_door, store_plate, retrieve_plate</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">    TemperatureControl set_temperature, wait_for_setpoint</text>
+<text x="18" y="173" fill="#57e389" font-size="14" font-weight="bold" xml:space="preserve">$ labbench experiment run -c configs/simulated-lab.yaml quick-image.yaml</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">{</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">  "run_id": "run_40413dbe2a77",</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">  "protocol": "quick-image",</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">  "status": "succeeded",</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">  "current_step": 1,</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">  "total_steps": 2,</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">  "elapsed_s": 0.23,</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">  "message": "completed",</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">  "steps": [</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">    {</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">      "label": "home",</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">      "index": 0,</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">      "device": "scope1",</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">      "feature": "MotionControl",</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">      "command": "home",</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">      "status": "succeeded",</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">      "attempt": 1,</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">      "started": 1787942729.6695728,</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">      "finished": 1787942729.6704407,</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">      "result": {</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.247356;0.248356;0.253920;0.254920;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">    PlateStorage       open_door, close_door, store_plate, retrieve_plate</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">    TemperatureControl set_temperature, wait_for_setpoint</text>
+<text x="18" y="97" fill="#57e389" font-size="14" font-weight="bold" xml:space="preserve">$ labbench experiment run -c configs/simulated-lab.yaml quick-image.yaml</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">{</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">  "run_id": "run_40413dbe2a77",</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">  "protocol": "quick-image",</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">  "status": "succeeded",</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">  "current_step": 1,</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">  "total_steps": 2,</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">  "elapsed_s": 0.23,</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">  "message": "completed",</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">  "steps": [</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">    {</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">      "label": "home",</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">      "index": 0,</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">      "device": "scope1",</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">      "feature": "MotionControl",</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">      "command": "home",</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">      "status": "succeeded",</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">      "attempt": 1,</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">      "started": 1787942729.6695728,</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">      "finished": 1787942729.6704407,</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">      "result": {</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">        "job": {</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">          "job_id": "job_c76eacb369a4",</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">          "label": "scope1.MotionControl.home",</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">          "status": "pending",</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.252920;0.253920;0.259484;0.260484;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">  "run_id": "run_40413dbe2a77",</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">  "protocol": "quick-image",</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">  "status": "succeeded",</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">  "current_step": 1,</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">  "total_steps": 2,</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">  "elapsed_s": 0.23,</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">  "message": "completed",</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">  "steps": [</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">    {</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">      "label": "home",</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">      "index": 0,</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">      "device": "scope1",</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">      "feature": "MotionControl",</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">      "command": "home",</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">      "status": "succeeded",</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">      "attempt": 1,</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">      "started": 1787942729.6695728,</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">      "finished": 1787942729.6704407,</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">      "result": {</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">        "job": {</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">          "job_id": "job_c76eacb369a4",</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">          "label": "scope1.MotionControl.home",</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">          "status": "pending",</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">          "progress": 0.0,</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">          "message": "",</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">          "elapsed_s": 0.0,</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">          "eta_s": 4.0,</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.258484;0.259484;0.265048;0.266048;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">  "total_steps": 2,</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">  "elapsed_s": 0.23,</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">  "message": "completed",</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">  "steps": [</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">    {</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">      "label": "home",</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">      "index": 0,</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">      "device": "scope1",</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">      "feature": "MotionControl",</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">      "command": "home",</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">      "status": "succeeded",</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">      "attempt": 1,</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">      "started": 1787942729.6695728,</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">      "finished": 1787942729.6704407,</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">      "result": {</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">        "job": {</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">          "job_id": "job_c76eacb369a4",</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">          "label": "scope1.MotionControl.home",</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">          "status": "pending",</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">          "progress": 0.0,</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">          "message": "",</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">          "elapsed_s": 0.0,</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">          "eta_s": 4.0,</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">          "device": "scope1"</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">        },</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">        "accepted": true,</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">        "note": "long-running; poll job.status or subscribe to job.update"</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.264048;0.265048;0.270612;0.271612;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">    {</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">      "label": "home",</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">      "index": 0,</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">      "device": "scope1",</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">      "feature": "MotionControl",</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">      "command": "home",</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">      "status": "succeeded",</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">      "attempt": 1,</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">      "started": 1787942729.6695728,</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">      "finished": 1787942729.6704407,</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">      "result": {</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">        "job": {</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">          "job_id": "job_c76eacb369a4",</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">          "label": "scope1.MotionControl.home",</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">          "status": "pending",</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">          "progress": 0.0,</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">          "message": "",</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">          "elapsed_s": 0.0,</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">          "eta_s": 4.0,</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">          "device": "scope1"</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">        },</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">        "accepted": true,</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">        "note": "long-running; poll job.status or subscribe to job.update"</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">      },</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">      "error": null,</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">      "approval_id": null</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">    },</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.269612;0.270612;0.276176;0.277176;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">      "feature": "MotionControl",</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">      "command": "home",</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">      "status": "succeeded",</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">      "attempt": 1,</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">      "started": 1787942729.6695728,</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">      "finished": 1787942729.6704407,</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">      "result": {</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">        "job": {</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">          "job_id": "job_c76eacb369a4",</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">          "label": "scope1.MotionControl.home",</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">          "status": "pending",</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">          "progress": 0.0,</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">          "message": "",</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">          "elapsed_s": 0.0,</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">          "eta_s": 4.0,</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">          "device": "scope1"</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">        },</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">        "accepted": true,</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">        "note": "long-running; poll job.status or subscribe to job.update"</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">      },</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">      "error": null,</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">      "approval_id": null</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">    },</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">    {</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">      "label": "snap",</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">      "index": 1,</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">      "device": "scope1",</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.275176;0.276176;0.281740;0.282740;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">      "started": 1787942729.6695728,</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">      "finished": 1787942729.6704407,</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">      "result": {</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">        "job": {</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">          "job_id": "job_c76eacb369a4",</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">          "label": "scope1.MotionControl.home",</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">          "status": "pending",</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">          "progress": 0.0,</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">          "message": "",</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">          "elapsed_s": 0.0,</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">          "eta_s": 4.0,</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">          "device": "scope1"</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">        },</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">        "accepted": true,</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">        "note": "long-running; poll job.status or subscribe to job.update"</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">      },</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">      "error": null,</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">      "approval_id": null</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">    },</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">    {</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">      "label": "snap",</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">      "index": 1,</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">      "device": "scope1",</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">      "feature": "Camera",</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">      "command": "snap",</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">      "status": "succeeded",</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">      "attempt": 1,</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.280740;0.281740;0.287304;0.288304;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">          "job_id": "job_c76eacb369a4",</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">          "label": "scope1.MotionControl.home",</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">          "status": "pending",</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">          "progress": 0.0,</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">          "message": "",</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">          "elapsed_s": 0.0,</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">          "eta_s": 4.0,</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">          "device": "scope1"</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">        },</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">        "accepted": true,</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">        "note": "long-running; poll job.status or subscribe to job.update"</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">      },</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">      "error": null,</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">      "approval_id": null</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">    },</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">    {</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">      "label": "snap",</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">      "index": 1,</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">      "device": "scope1",</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">      "feature": "Camera",</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">      "command": "snap",</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">      "status": "succeeded",</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">      "attempt": 1,</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">      "started": 1787942729.6704643,</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">      "finished": 1787942729.9043431,</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">      "result": {</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">        "artifact_uri": "file:///home/zerah/Downloads/Nvidia/labbench-</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.286304;0.287304;0.292868;0.293868;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">          "message": "",</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">          "elapsed_s": 0.0,</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">          "eta_s": 4.0,</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">          "device": "scope1"</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">        },</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">        "accepted": true,</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">        "note": "long-running; poll job.status or subscribe to job.update"</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">      },</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">      "error": null,</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">      "approval_id": null</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">    },</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">    {</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">      "label": "snap",</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">      "index": 1,</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">      "device": "scope1",</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">      "feature": "Camera",</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">      "command": "snap",</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">      "status": "succeeded",</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">      "attempt": 1,</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">      "started": 1787942729.6704643,</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">      "finished": 1787942729.9043431,</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">      "result": {</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">        "artifact_uri": "file:///home/zerah/Downloads/Nvidia/labbench-</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">  data/images/scope1_20260829T001529_a0ae39.png",</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">        "artifacts": [</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">          {</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">            "uri": "file:///home/zerah/Downloads/Nvidia/labbench-</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.291868;0.292868;0.298432;0.299432;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">        },</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">        "accepted": true,</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">        "note": "long-running; poll job.status or subscribe to job.update"</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">      },</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">      "error": null,</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">      "approval_id": null</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">    },</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">    {</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">      "label": "snap",</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">      "index": 1,</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">      "device": "scope1",</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">      "feature": "Camera",</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">      "command": "snap",</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">      "status": "succeeded",</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">      "attempt": 1,</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">      "started": 1787942729.6704643,</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">      "finished": 1787942729.9043431,</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">      "result": {</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">        "artifact_uri": "file:///home/zerah/Downloads/Nvidia/labbench-</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">  data/images/scope1_20260829T001529_a0ae39.png",</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">        "artifacts": [</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">          {</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">            "uri": "file:///home/zerah/Downloads/Nvidia/labbench-</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">  data/images/scope1_20260829T001529_a0ae39.png",</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">            "kind": "image",</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">            "mime_type": "image/png",</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">            "bytes": 236340,</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.297432;0.298432;0.303996;0.304996;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">      "error": null,</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">      "approval_id": null</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">    },</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">    {</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">      "label": "snap",</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">      "index": 1,</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">      "device": "scope1",</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">      "feature": "Camera",</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">      "command": "snap",</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">      "status": "succeeded",</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">      "attempt": 1,</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">      "started": 1787942729.6704643,</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">      "finished": 1787942729.9043431,</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">      "result": {</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">        "artifact_uri": "file:///home/zerah/Downloads/Nvidia/labbench-</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">  data/images/scope1_20260829T001529_a0ae39.png",</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">        "artifacts": [</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">          {</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">            "uri": "file:///home/zerah/Downloads/Nvidia/labbench-</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">  data/images/scope1_20260829T001529_a0ae39.png",</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">            "kind": "image",</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">            "mime_type": "image/png",</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">            "bytes": 236340,</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">            "shape": [</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">              512,</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">              512</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">            ],</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.302996;0.303996;0.309560;0.310560;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">      "label": "snap",</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">      "index": 1,</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">      "device": "scope1",</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">      "feature": "Camera",</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">      "command": "snap",</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">      "status": "succeeded",</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">      "attempt": 1,</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">      "started": 1787942729.6704643,</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">      "finished": 1787942729.9043431,</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">      "result": {</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">        "artifact_uri": "file:///home/zerah/Downloads/Nvidia/labbench-</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">  data/images/scope1_20260829T001529_a0ae39.png",</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">        "artifacts": [</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">          {</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">            "uri": "file:///home/zerah/Downloads/Nvidia/labbench-</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">  data/images/scope1_20260829T001529_a0ae39.png",</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">            "kind": "image",</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">            "mime_type": "image/png",</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">            "bytes": 236340,</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">            "shape": [</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">              512,</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">              512</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">            ],</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">            "dtype": "uint16",</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">            "metadata": {</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">              "device": "scope1",</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">              "objective": "20x",</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.308560;0.309560;0.315124;0.316124;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">      "command": "snap",</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">      "status": "succeeded",</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">      "attempt": 1,</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">      "started": 1787942729.6704643,</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">      "finished": 1787942729.9043431,</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">      "result": {</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">        "artifact_uri": "file:///home/zerah/Downloads/Nvidia/labbench-</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">  data/images/scope1_20260829T001529_a0ae39.png",</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">        "artifacts": [</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">          {</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">            "uri": "file:///home/zerah/Downloads/Nvidia/labbench-</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">  data/images/scope1_20260829T001529_a0ae39.png",</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">            "kind": "image",</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">            "mime_type": "image/png",</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">            "bytes": 236340,</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">            "shape": [</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">              512,</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">              512</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">            ],</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">            "dtype": "uint16",</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">            "metadata": {</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">              "device": "scope1",</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">              "objective": "20x",</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">              "channel": "BF",</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">              "exposure_ms": 40.0,</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">              "intensity_pct": 20.0,</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">              "x_um": 10000.0,</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.314124;0.315124;0.320688;0.321688;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">      "finished": 1787942729.9043431,</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">      "result": {</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">        "artifact_uri": "file:///home/zerah/Downloads/Nvidia/labbench-</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">  data/images/scope1_20260829T001529_a0ae39.png",</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">        "artifacts": [</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">          {</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">            "uri": "file:///home/zerah/Downloads/Nvidia/labbench-</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">  data/images/scope1_20260829T001529_a0ae39.png",</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">            "kind": "image",</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">            "mime_type": "image/png",</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">            "bytes": 236340,</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">            "shape": [</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">              512,</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">              512</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">            ],</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">            "dtype": "uint16",</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">            "metadata": {</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">              "device": "scope1",</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">              "objective": "20x",</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">              "channel": "BF",</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">              "exposure_ms": 40.0,</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">              "intensity_pct": 20.0,</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">              "x_um": 10000.0,</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">              "y_um": 10000.0,</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">              "z_um": 150.0,</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">              "pixel_size_um": 0.325,</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">              "focus_score": 0.0078,</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.319688;0.320688;0.326252;0.327252;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">        "artifacts": [</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">          {</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">            "uri": "file:///home/zerah/Downloads/Nvidia/labbench-</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">  data/images/scope1_20260829T001529_a0ae39.png",</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">            "kind": "image",</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">            "mime_type": "image/png",</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">            "bytes": 236340,</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">            "shape": [</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">              512,</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">              512</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">            ],</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">            "dtype": "uint16",</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">            "metadata": {</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">              "device": "scope1",</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">              "objective": "20x",</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">              "channel": "BF",</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">              "exposure_ms": 40.0,</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">              "intensity_pct": 20.0,</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">              "x_um": 10000.0,</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">              "y_um": 10000.0,</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">              "z_um": 150.0,</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">              "pixel_size_um": 0.325,</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">              "focus_score": 0.0078,</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">              "simulated": true</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">            }</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">          }</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">        ],</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.325252;0.326252;0.331816;0.332816;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">            "kind": "image",</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">            "mime_type": "image/png",</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">            "bytes": 236340,</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">            "shape": [</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">              512,</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">              512</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">            ],</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">            "dtype": "uint16",</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">            "metadata": {</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">              "device": "scope1",</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">              "objective": "20x",</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">              "channel": "BF",</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">              "exposure_ms": 40.0,</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">              "intensity_pct": 20.0,</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">              "x_um": 10000.0,</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">              "y_um": 10000.0,</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">              "z_um": 150.0,</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">              "pixel_size_um": 0.325,</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">              "focus_score": 0.0078,</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">              "simulated": true</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">            }</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">          }</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">        ],</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">        "focus_score": 0.0078,</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">        "saturated_fraction": 0.0,</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">        "snr_estimate": 2.491,</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">        "pixel_size_um": 0.325,</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.330816;0.331816;0.337380;0.338380;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">              512,</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">              512</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">            ],</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">            "dtype": "uint16",</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">            "metadata": {</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">              "device": "scope1",</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">              "objective": "20x",</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">              "channel": "BF",</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">              "exposure_ms": 40.0,</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">              "intensity_pct": 20.0,</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">              "x_um": 10000.0,</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">              "y_um": 10000.0,</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">              "z_um": 150.0,</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">              "pixel_size_um": 0.325,</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">              "focus_score": 0.0078,</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">              "simulated": true</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">            }</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">          }</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">        ],</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">        "focus_score": 0.0078,</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">        "saturated_fraction": 0.0,</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">        "snr_estimate": 2.491,</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">        "pixel_size_um": 0.325,</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">        "exposure_ms": 40.0,</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">        "position": {</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">          "x_um": 10000.0,</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">          "y_um": 10000.0,</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.336380;0.337380;0.342944;0.343944;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">            "metadata": {</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">              "device": "scope1",</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">              "objective": "20x",</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">              "channel": "BF",</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">              "exposure_ms": 40.0,</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">              "intensity_pct": 20.0,</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">              "x_um": 10000.0,</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">              "y_um": 10000.0,</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">              "z_um": 150.0,</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">              "pixel_size_um": 0.325,</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">              "focus_score": 0.0078,</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">              "simulated": true</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">            }</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">          }</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">        ],</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">        "focus_score": 0.0078,</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">        "saturated_fraction": 0.0,</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">        "snr_estimate": 2.491,</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">        "pixel_size_um": 0.325,</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">        "exposure_ms": 40.0,</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">        "position": {</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">          "x_um": 10000.0,</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">          "y_um": 10000.0,</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">          "z_um": 150.0</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">        }</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">      },</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">      "error": null,</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.341944;0.342944;0.348508;0.349508;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">              "exposure_ms": 40.0,</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">              "intensity_pct": 20.0,</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">              "x_um": 10000.0,</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">              "y_um": 10000.0,</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">              "z_um": 150.0,</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">              "pixel_size_um": 0.325,</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">              "focus_score": 0.0078,</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">              "simulated": true</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">            }</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">          }</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">        ],</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">        "focus_score": 0.0078,</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">        "saturated_fraction": 0.0,</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">        "snr_estimate": 2.491,</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">        "pixel_size_um": 0.325,</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">        "exposure_ms": 40.0,</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">        "position": {</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">          "x_um": 10000.0,</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">          "y_um": 10000.0,</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">          "z_um": 150.0</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">        }</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">      },</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">      "error": null,</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">      "approval_id": null</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">    }</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">  ]</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">}</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.347508;0.348508;0.490137;0.491137;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">              "intensity_pct": 20.0,</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">              "x_um": 10000.0,</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">              "y_um": 10000.0,</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">              "z_um": 150.0,</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">              "pixel_size_um": 0.325,</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">              "focus_score": 0.0078,</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">              "simulated": true</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">            }</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">          }</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">        ],</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">        "focus_score": 0.0078,</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">        "saturated_fraction": 0.0,</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">        "snr_estimate": 2.491,</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">        "pixel_size_um": 0.325,</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">        "exposure_ms": 40.0,</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">        "position": {</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">          "x_um": 10000.0,</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">          "y_um": 10000.0,</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">          "z_um": 150.0</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">        }</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">      },</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">      "error": null,</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">      "approval_id": null</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">    }</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">  ]</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">}</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">labbench: running 'quick-image' as run_40413dbe2a77</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.489137;0.490137;0.517956;0.518956;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">              "x_um": 10000.0,</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">              "y_um": 10000.0,</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">              "z_um": 150.0,</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">              "pixel_size_um": 0.325,</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">              "focus_score": 0.0078,</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">              "simulated": true</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">            }</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">          }</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">        ],</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">        "focus_score": 0.0078,</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">        "saturated_fraction": 0.0,</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">        "snr_estimate": 2.491,</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">        "pixel_size_um": 0.325,</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">        "exposure_ms": 40.0,</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">        "position": {</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">          "x_um": 10000.0,</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">          "y_um": 10000.0,</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">          "z_um": 150.0</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">        }</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">      },</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">      "error": null,</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">      "approval_id": null</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">    }</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">  ]</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">}</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">labbench: running 'quick-image' as run_40413dbe2a77</text>
+<text x="18" y="553" fill="#57e389" font-size="14" font-weight="bold" xml:space="preserve">$ labbench experiment run -c configs/simulated-lab.yaml gas-change.yaml</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.516956;0.517956;0.523520;0.524520;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">              "pixel_size_um": 0.325,</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">              "focus_score": 0.0078,</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">              "simulated": true</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">            }</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">          }</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">        ],</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">        "focus_score": 0.0078,</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">        "saturated_fraction": 0.0,</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">        "snr_estimate": 2.491,</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">        "pixel_size_um": 0.325,</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">        "exposure_ms": 40.0,</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">        "position": {</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">          "x_um": 10000.0,</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">          "y_um": 10000.0,</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">          "z_um": 150.0</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">        }</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">      },</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">      "error": null,</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">      "approval_id": null</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">    }</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">  ]</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">}</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">labbench: running 'quick-image' as run_40413dbe2a77</text>
+<text x="18" y="496" fill="#57e389" font-size="14" font-weight="bold" xml:space="preserve">$ labbench experiment run -c configs/simulated-lab.yaml gas-change.yaml</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">{</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">  "run_id": "run_81e1faf69726",</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">  "protocol": "gas-change",</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.522520;0.523520;0.529084;0.530084;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">            }</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">          }</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">        ],</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">        "focus_score": 0.0078,</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">        "saturated_fraction": 0.0,</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">        "snr_estimate": 2.491,</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">        "pixel_size_um": 0.325,</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">        "exposure_ms": 40.0,</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">        "position": {</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">          "x_um": 10000.0,</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">          "y_um": 10000.0,</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">          "z_um": 150.0</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">        }</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">      },</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">      "error": null,</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">      "approval_id": null</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">    }</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">  ]</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">}</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">labbench: running 'quick-image' as run_40413dbe2a77</text>
+<text x="18" y="439" fill="#57e389" font-size="14" font-weight="bold" xml:space="preserve">$ labbench experiment run -c configs/simulated-lab.yaml gas-change.yaml</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">{</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">  "run_id": "run_81e1faf69726",</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">  "protocol": "gas-change",</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">  "status": "failed",</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">  "current_step": 0,</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">  "total_steps": 1,</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.528084;0.529084;0.534648;0.535648;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">        "focus_score": 0.0078,</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">        "saturated_fraction": 0.0,</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">        "snr_estimate": 2.491,</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">        "pixel_size_um": 0.325,</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">        "exposure_ms": 40.0,</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">        "position": {</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">          "x_um": 10000.0,</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">          "y_um": 10000.0,</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">          "z_um": 150.0</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">        }</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">      },</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">      "error": null,</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">      "approval_id": null</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">    }</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">  ]</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">}</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">labbench: running 'quick-image' as run_40413dbe2a77</text>
+<text x="18" y="382" fill="#57e389" font-size="14" font-weight="bold" xml:space="preserve">$ labbench experiment run -c configs/simulated-lab.yaml gas-change.yaml</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">{</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">  "run_id": "run_81e1faf69726",</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">  "protocol": "gas-change",</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">  "status": "failed",</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">  "current_step": 0,</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">  "total_steps": 1,</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">  "elapsed_s": 0.1,</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">  "message": "step 'step1_incubator1.GasControl.set_co2' failed: approval 'apr_002773330178' is </text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">  denied, not granted",</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.533648;0.534648;0.540212;0.541212;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">        "pixel_size_um": 0.325,</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">        "exposure_ms": 40.0,</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">        "position": {</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">          "x_um": 10000.0,</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">          "y_um": 10000.0,</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">          "z_um": 150.0</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">        }</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">      },</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">      "error": null,</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">      "approval_id": null</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">    }</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">  ]</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">}</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">labbench: running 'quick-image' as run_40413dbe2a77</text>
+<text x="18" y="325" fill="#57e389" font-size="14" font-weight="bold" xml:space="preserve">$ labbench experiment run -c configs/simulated-lab.yaml gas-change.yaml</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">{</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">  "run_id": "run_81e1faf69726",</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">  "protocol": "gas-change",</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">  "status": "failed",</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">  "current_step": 0,</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">  "total_steps": 1,</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">  "elapsed_s": 0.1,</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">  "message": "step 'step1_incubator1.GasControl.set_co2' failed: approval 'apr_002773330178' is </text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">  denied, not granted",</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">  "steps": [</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">    {</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">      "label": "step1_incubator1.GasControl.set_co2",</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.539212;0.540212;0.545776;0.546776;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">          "x_um": 10000.0,</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">          "y_um": 10000.0,</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">          "z_um": 150.0</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">        }</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">      },</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">      "error": null,</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">      "approval_id": null</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">    }</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">  ]</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">}</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">labbench: running 'quick-image' as run_40413dbe2a77</text>
+<text x="18" y="268" fill="#57e389" font-size="14" font-weight="bold" xml:space="preserve">$ labbench experiment run -c configs/simulated-lab.yaml gas-change.yaml</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">{</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">  "run_id": "run_81e1faf69726",</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">  "protocol": "gas-change",</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">  "status": "failed",</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">  "current_step": 0,</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">  "total_steps": 1,</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">  "elapsed_s": 0.1,</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">  "message": "step 'step1_incubator1.GasControl.set_co2' failed: approval 'apr_002773330178' is </text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">  denied, not granted",</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">  "steps": [</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">    {</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">      "label": "step1_incubator1.GasControl.set_co2",</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">      "index": 0,</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">      "device": "incubator1",</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">      "feature": "GasControl",</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.544776;0.545776;0.551340;0.552340;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">        }</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">      },</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">      "error": null,</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">      "approval_id": null</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">    }</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">  ]</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">}</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">labbench: running 'quick-image' as run_40413dbe2a77</text>
+<text x="18" y="211" fill="#57e389" font-size="14" font-weight="bold" xml:space="preserve">$ labbench experiment run -c configs/simulated-lab.yaml gas-change.yaml</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">{</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">  "run_id": "run_81e1faf69726",</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">  "protocol": "gas-change",</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">  "status": "failed",</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">  "current_step": 0,</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">  "total_steps": 1,</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">  "elapsed_s": 0.1,</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">  "message": "step 'step1_incubator1.GasControl.set_co2' failed: approval 'apr_002773330178' is </text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">  denied, not granted",</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">  "steps": [</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">    {</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">      "label": "step1_incubator1.GasControl.set_co2",</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">      "index": 0,</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">      "device": "incubator1",</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">      "feature": "GasControl",</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">      "command": "set_co2",</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">      "status": "failed",</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">      "attempt": 1,</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.550340;0.551340;0.556904;0.557904;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">      "approval_id": null</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">    }</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">  ]</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">}</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">labbench: running 'quick-image' as run_40413dbe2a77</text>
+<text x="18" y="154" fill="#57e389" font-size="14" font-weight="bold" xml:space="preserve">$ labbench experiment run -c configs/simulated-lab.yaml gas-change.yaml</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">{</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">  "run_id": "run_81e1faf69726",</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">  "protocol": "gas-change",</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">  "status": "failed",</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">  "current_step": 0,</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">  "total_steps": 1,</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">  "elapsed_s": 0.1,</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">  "message": "step 'step1_incubator1.GasControl.set_co2' failed: approval 'apr_002773330178' is </text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">  denied, not granted",</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">  "steps": [</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">    {</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">      "label": "step1_incubator1.GasControl.set_co2",</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">      "index": 0,</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">      "device": "incubator1",</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">      "feature": "GasControl",</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">      "command": "set_co2",</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">      "status": "failed",</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">      "attempt": 1,</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">      "started": 1787942730.5989776,</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">      "finished": 1787942730.7003074,</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">      "result": null,</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.555904;0.556904;0.562468;0.563468;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">}</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">labbench: running 'quick-image' as run_40413dbe2a77</text>
+<text x="18" y="97" fill="#57e389" font-size="14" font-weight="bold" xml:space="preserve">$ labbench experiment run -c configs/simulated-lab.yaml gas-change.yaml</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">{</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">  "run_id": "run_81e1faf69726",</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">  "protocol": "gas-change",</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">  "status": "failed",</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">  "current_step": 0,</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">  "total_steps": 1,</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">  "elapsed_s": 0.1,</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">  "message": "step 'step1_incubator1.GasControl.set_co2' failed: approval 'apr_002773330178' is </text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">  denied, not granted",</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">  "steps": [</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">    {</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">      "label": "step1_incubator1.GasControl.set_co2",</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">      "index": 0,</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">      "device": "incubator1",</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">      "feature": "GasControl",</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">      "command": "set_co2",</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">      "status": "failed",</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">      "attempt": 1,</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">      "started": 1787942730.5989776,</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">      "finished": 1787942730.7003074,</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">      "result": null,</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">      "error": {</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">        "error": "approval_denied",</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">        "message": "approval 'apr_002773330178' is denied, not granted",</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.561468;0.562468;0.568032;0.569032;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">{</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">  "run_id": "run_81e1faf69726",</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">  "protocol": "gas-change",</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">  "status": "failed",</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">  "current_step": 0,</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">  "total_steps": 1,</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">  "elapsed_s": 0.1,</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">  "message": "step 'step1_incubator1.GasControl.set_co2' failed: approval 'apr_002773330178' is </text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">  denied, not granted",</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">  "steps": [</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">    {</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">      "label": "step1_incubator1.GasControl.set_co2",</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">      "index": 0,</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">      "device": "incubator1",</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">      "feature": "GasControl",</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">      "command": "set_co2",</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">      "status": "failed",</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">      "attempt": 1,</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">      "started": 1787942730.5989776,</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">      "finished": 1787942730.7003074,</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">      "result": null,</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">      "error": {</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">        "error": "approval_denied",</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">        "message": "approval 'apr_002773330178' is denied, not granted",</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">        "recovery": "abort",</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">        "state_uncertain": false,</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">        "detail": {</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.567032;0.568032;0.573596;0.574596;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">  "status": "failed",</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">  "current_step": 0,</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">  "total_steps": 1,</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">  "elapsed_s": 0.1,</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">  "message": "step 'step1_incubator1.GasControl.set_co2' failed: approval 'apr_002773330178' is </text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">  denied, not granted",</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">  "steps": [</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">    {</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">      "label": "step1_incubator1.GasControl.set_co2",</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">      "index": 0,</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">      "device": "incubator1",</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">      "feature": "GasControl",</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">      "command": "set_co2",</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">      "status": "failed",</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">      "attempt": 1,</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">      "started": 1787942730.5989776,</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">      "finished": 1787942730.7003074,</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">      "result": null,</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">      "error": {</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">        "error": "approval_denied",</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">        "message": "approval 'apr_002773330178' is denied, not granted",</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">        "recovery": "abort",</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">        "state_uncertain": false,</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">        "detail": {</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">          "approval_id": "apr_002773330178",</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">          "state": "denied",</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">          "decided_by": "human:cli",</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.572596;0.573596;0.579160;0.580160;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">  "elapsed_s": 0.1,</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">  "message": "step 'step1_incubator1.GasControl.set_co2' failed: approval 'apr_002773330178' is </text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">  denied, not granted",</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">  "steps": [</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">    {</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">      "label": "step1_incubator1.GasControl.set_co2",</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">      "index": 0,</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">      "device": "incubator1",</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">      "feature": "GasControl",</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">      "command": "set_co2",</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">      "status": "failed",</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">      "attempt": 1,</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">      "started": 1787942730.5989776,</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">      "finished": 1787942730.7003074,</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">      "result": null,</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">      "error": {</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">        "error": "approval_denied",</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">        "message": "approval 'apr_002773330178' is denied, not granted",</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">        "recovery": "abort",</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">        "state_uncertain": false,</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">        "detail": {</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">          "approval_id": "apr_002773330178",</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">          "state": "denied",</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">          "decided_by": "human:cli",</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">          "reason": "declined at the CLI"</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">        }</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">      },</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.578160;0.579160;0.584724;0.585724;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">  "steps": [</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">    {</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">      "label": "step1_incubator1.GasControl.set_co2",</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">      "index": 0,</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">      "device": "incubator1",</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">      "feature": "GasControl",</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">      "command": "set_co2",</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">      "status": "failed",</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">      "attempt": 1,</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">      "started": 1787942730.5989776,</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">      "finished": 1787942730.7003074,</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">      "result": null,</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">      "error": {</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">        "error": "approval_denied",</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">        "message": "approval 'apr_002773330178' is denied, not granted",</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">        "recovery": "abort",</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">        "state_uncertain": false,</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">        "detail": {</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">          "approval_id": "apr_002773330178",</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">          "state": "denied",</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">          "decided_by": "human:cli",</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">          "reason": "declined at the CLI"</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">        }</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">      },</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">      "approval_id": "apr_002773330178"</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">    }</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">  ]</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.583724;0.584724;0.590288;0.591288;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">      "index": 0,</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">      "device": "incubator1",</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">      "feature": "GasControl",</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">      "command": "set_co2",</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">      "status": "failed",</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">      "attempt": 1,</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">      "started": 1787942730.5989776,</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">      "finished": 1787942730.7003074,</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">      "result": null,</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">      "error": {</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">        "error": "approval_denied",</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">        "message": "approval 'apr_002773330178' is denied, not granted",</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">        "recovery": "abort",</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">        "state_uncertain": false,</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">        "detail": {</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">          "approval_id": "apr_002773330178",</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">          "state": "denied",</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">          "decided_by": "human:cli",</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">          "reason": "declined at the CLI"</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">        }</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">      },</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">      "approval_id": "apr_002773330178"</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">    }</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">  ]</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">}</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">labbench: running 'gas-change' as run_81e1faf69726</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.589288;0.590288;0.595852;0.596852;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">      "command": "set_co2",</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">      "status": "failed",</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">      "attempt": 1,</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">      "started": 1787942730.5989776,</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">      "finished": 1787942730.7003074,</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">      "result": null,</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">      "error": {</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">        "error": "approval_denied",</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">        "message": "approval 'apr_002773330178' is denied, not granted",</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">        "recovery": "abort",</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">        "state_uncertain": false,</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">        "detail": {</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">          "approval_id": "apr_002773330178",</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">          "state": "denied",</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">          "decided_by": "human:cli",</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">          "reason": "declined at the CLI"</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">        }</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">      },</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">      "approval_id": "apr_002773330178"</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">    }</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">  ]</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">}</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">labbench: running 'gas-change' as run_81e1faf69726</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">APPROVAL REQUIRED — CO2 Incubator [SIMULATED DEVICE]</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">  action     : GasControl.set_co2</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">  arguments  : {'co2_pct': 5.0}</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.594852;0.595852;0.601416;0.602416;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">      "started": 1787942730.5989776,</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">      "finished": 1787942730.7003074,</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">      "result": null,</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">      "error": {</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">        "error": "approval_denied",</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">        "message": "approval 'apr_002773330178' is denied, not granted",</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">        "recovery": "abort",</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">        "state_uncertain": false,</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">        "detail": {</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">          "approval_id": "apr_002773330178",</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">          "state": "denied",</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">          "decided_by": "human:cli",</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">          "reason": "declined at the CLI"</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">        }</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">      },</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">      "approval_id": "apr_002773330178"</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">    }</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">  ]</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">}</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">labbench: running 'gas-change' as run_81e1faf69726</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">APPROVAL REQUIRED — CO2 Incubator [SIMULATED DEVICE]</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">  action     : GasControl.set_co2</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">  arguments  : {'co2_pct': 5.0}</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">  hazard     : biological   reversibility: restorable</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">  est. time  : 1s</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">  stated why : gas-change: step1_incubator1.GasControl.set_co2</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.600416;0.601416;0.606980;0.607980;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">      "error": {</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">        "error": "approval_denied",</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">        "message": "approval 'apr_002773330178' is denied, not granted",</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">        "recovery": "abort",</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">        "state_uncertain": false,</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">        "detail": {</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">          "approval_id": "apr_002773330178",</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">          "state": "denied",</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">          "decided_by": "human:cli",</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">          "reason": "declined at the CLI"</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">        }</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">      },</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">      "approval_id": "apr_002773330178"</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">    }</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">  ]</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">}</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">labbench: running 'gas-change' as run_81e1faf69726</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">APPROVAL REQUIRED — CO2 Incubator [SIMULATED DEVICE]</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">  action     : GasControl.set_co2</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">  arguments  : {'co2_pct': 5.0}</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">  hazard     : biological   reversibility: restorable</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">  est. time  : 1s</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">  stated why : gas-change: step1_incubator1.GasControl.set_co2</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">  because    :</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">    - rule 'incubator-gas-needs-a-human': CO2 setpoint changes act directly on live cultures and are</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">   not delegated to an agent on this bench.</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.605980;0.606980;0.612544;0.613544;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">        "recovery": "abort",</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">        "state_uncertain": false,</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">        "detail": {</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">          "approval_id": "apr_002773330178",</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">          "state": "denied",</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">          "decided_by": "human:cli",</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">          "reason": "declined at the CLI"</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">        }</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">      },</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">      "approval_id": "apr_002773330178"</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">    }</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">  ]</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">}</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">labbench: running 'gas-change' as run_81e1faf69726</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">APPROVAL REQUIRED — CO2 Incubator [SIMULATED DEVICE]</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">  action     : GasControl.set_co2</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">  arguments  : {'co2_pct': 5.0}</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">  hazard     : biological   reversibility: restorable</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">  est. time  : 1s</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">  stated why : gas-change: step1_incubator1.GasControl.set_co2</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">  because    :</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">    - rule 'incubator-gas-needs-a-human': CO2 setpoint changes act directly on live cultures and are</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">   not delegated to an agent on this bench.</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">    - hazard class 'biological' always requires a human signature</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">    - no digital twin for GasControl.set_co2; outcome unverifiable at hazard 'biological'</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.611544;0.612544;0.794638;0.795638;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">          "approval_id": "apr_002773330178",</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">          "state": "denied",</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">          "decided_by": "human:cli",</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">          "reason": "declined at the CLI"</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">        }</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">      },</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">      "approval_id": "apr_002773330178"</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">    }</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">  ]</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">}</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">labbench: running 'gas-change' as run_81e1faf69726</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">APPROVAL REQUIRED — CO2 Incubator [SIMULATED DEVICE]</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">  action     : GasControl.set_co2</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">  arguments  : {'co2_pct': 5.0}</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">  hazard     : biological   reversibility: restorable</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">  est. time  : 1s</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">  stated why : gas-change: step1_incubator1.GasControl.set_co2</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">  because    :</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">    - rule 'incubator-gas-needs-a-human': CO2 setpoint changes act directly on live cultures and are</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">   not delegated to an agent on this bench.</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">    - hazard class 'biological' always requires a human signature</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">    - no digital twin for GasControl.set_co2; outcome unverifiable at hazard 'biological'</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">    - simulation warning: no predictive model for GasControl.set_co2</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">Grant this action? [y/N] </text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.793638;0.794638;0.822458;0.823458;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">          "state": "denied",</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">          "decided_by": "human:cli",</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">          "reason": "declined at the CLI"</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">        }</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">      },</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">      "approval_id": "apr_002773330178"</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">    }</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">  ]</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">}</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">labbench: running 'gas-change' as run_81e1faf69726</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">APPROVAL REQUIRED — CO2 Incubator [SIMULATED DEVICE]</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">  action     : GasControl.set_co2</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">  arguments  : {'co2_pct': 5.0}</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">  hazard     : biological   reversibility: restorable</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">  est. time  : 1s</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">  stated why : gas-change: step1_incubator1.GasControl.set_co2</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">  because    :</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">    - rule 'incubator-gas-needs-a-human': CO2 setpoint changes act directly on live cultures and are</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">   not delegated to an agent on this bench.</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">    - hazard class 'biological' always requires a human signature</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">    - no digital twin for GasControl.set_co2; outcome unverifiable at hazard 'biological'</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">    - simulation warning: no predictive model for GasControl.set_co2</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">Grant this action? [y/N] </text>
+<text x="18" y="553" fill="#57e389" font-size="14" font-weight="bold" xml:space="preserve">$ labbench ledger verify</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0.000000;0.821458;0.822458;0.828022;0.829022;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">      },</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">      "approval_id": "apr_002773330178"</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">    }</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve">  ]</text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">}</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">labbench: running 'gas-change' as run_81e1faf69726</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">APPROVAL REQUIRED — CO2 Incubator [SIMULATED DEVICE]</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">  action     : GasControl.set_co2</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">  arguments  : {'co2_pct': 5.0}</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">  hazard     : biological   reversibility: restorable</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">  est. time  : 1s</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">  stated why : gas-change: step1_incubator1.GasControl.set_co2</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve">  because    :</text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">    - rule 'incubator-gas-needs-a-human': CO2 setpoint changes act directly on live cultures and are</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">   not delegated to an agent on this bench.</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve">    - hazard class 'biological' always requires a human signature</text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">    - no digital twin for GasControl.set_co2; outcome unverifiable at hazard 'biological'</text>
+<text x="18" y="420" fill="#f1f2f6" font-size="14" xml:space="preserve">    - simulation warning: no predictive model for GasControl.set_co2</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">Grant this action? [y/N] </text>
+<text x="18" y="477" fill="#57e389" font-size="14" font-weight="bold" xml:space="preserve">$ labbench ledger verify</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">{</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">  "valid": true,</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve">  "records": 36,</text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">  "head": "3a5d381934ca10686f06b355b3d0bf401ca0c92ebfdd96a6921e2f31c93fe64c"</text>
+</g>
+<g opacity="0">
+<animate attributeName="opacity" values="0;0;1;1;1" keyTimes="0.000000;0.827022;0.828022;1.000000;1.000000" dur="19.770s" begin="0s" repeatCount="indefinite"/>
+<text x="18" y="59" fill="#f1f2f6" font-size="14" xml:space="preserve">  ]</text>
+<text x="18" y="78" fill="#f1f2f6" font-size="14" xml:space="preserve">}</text>
+<text x="18" y="97" fill="#f1f2f6" font-size="14" xml:space="preserve">labbench: running 'gas-change' as run_81e1faf69726</text>
+<text x="18" y="116" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="135" fill="#f1f2f6" font-size="14" xml:space="preserve">APPROVAL REQUIRED — CO2 Incubator [SIMULATED DEVICE]</text>
+<text x="18" y="154" fill="#f1f2f6" font-size="14" xml:space="preserve">  action     : GasControl.set_co2</text>
+<text x="18" y="173" fill="#f1f2f6" font-size="14" xml:space="preserve">  arguments  : {'co2_pct': 5.0}</text>
+<text x="18" y="192" fill="#f1f2f6" font-size="14" xml:space="preserve">  hazard     : biological   reversibility: restorable</text>
+<text x="18" y="211" fill="#f1f2f6" font-size="14" xml:space="preserve">  est. time  : 1s</text>
+<text x="18" y="230" fill="#f1f2f6" font-size="14" xml:space="preserve">  stated why : gas-change: step1_incubator1.GasControl.set_co2</text>
+<text x="18" y="249" fill="#f1f2f6" font-size="14" xml:space="preserve">  because    :</text>
+<text x="18" y="268" fill="#f1f2f6" font-size="14" xml:space="preserve">    - rule 'incubator-gas-needs-a-human': CO2 setpoint changes act directly on live cultures and are</text>
+<text x="18" y="287" fill="#f1f2f6" font-size="14" xml:space="preserve">   not delegated to an agent on this bench.</text>
+<text x="18" y="306" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="325" fill="#f1f2f6" font-size="14" xml:space="preserve">    - hazard class 'biological' always requires a human signature</text>
+<text x="18" y="344" fill="#f1f2f6" font-size="14" xml:space="preserve">    - no digital twin for GasControl.set_co2; outcome unverifiable at hazard 'biological'</text>
+<text x="18" y="363" fill="#f1f2f6" font-size="14" xml:space="preserve">    - simulation warning: no predictive model for GasControl.set_co2</text>
+<text x="18" y="382" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="401" fill="#f1f2f6" font-size="14" xml:space="preserve">Grant this action? [y/N] </text>
+<text x="18" y="420" fill="#57e389" font-size="14" font-weight="bold" xml:space="preserve">$ labbench ledger verify</text>
+<text x="18" y="439" fill="#f1f2f6" font-size="14" xml:space="preserve">{</text>
+<text x="18" y="458" fill="#f1f2f6" font-size="14" xml:space="preserve">  "valid": true,</text>
+<text x="18" y="477" fill="#f1f2f6" font-size="14" xml:space="preserve">  "records": 36,</text>
+<text x="18" y="496" fill="#f1f2f6" font-size="14" xml:space="preserve">  "head": "3a5d381934ca10686f06b355b3d0bf401ca0c92ebfdd96a6921e2f31c93fe64c"</text>
+<text x="18" y="515" fill="#f1f2f6" font-size="14" xml:space="preserve">}</text>
+<text x="18" y="534" fill="#f1f2f6" font-size="14" xml:space="preserve"></text>
+<text x="18" y="553" fill="#f1f2f6" font-size="14" xml:space="preserve">chain intact across 36 records</text>
+</g>
+</svg>

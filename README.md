@@ -2,6 +2,11 @@
 
 **A USB cable for laboratory hardware.** Plug any AI model into any supported instrument.
 
+<p align="center">
+  <img src="docs/demo.svg" alt="labbench CLI: listing instruments, running a protocol, a hazardous step parking on a human signature, and verifying the audit trail" width="820">
+</p>
+<p align="center"><sub>Real CLI output, animated — discover the lab, run a protocol, watch the safety kernel park a hazardous step on a human signature, then verify the tamper-evident ledger.</sub></p>
+
 ```
    ANY AI MODEL                  LabBench                    ANY INSTRUMENT
  ┌───────────────┐         ┌──────────────────┐         ┌───────────────────┐
@@ -36,15 +41,15 @@ updated as each layer lands.
 | `protocol/` | HTTP/1.1 server, SSE, WebSocket (RFC 6455), stdio | ✅ complete |
 | `protocol/client.py` | Client for all three transports, one call surface | ✅ complete |
 | `bridge/` | Tool schemas (6 AI dialects), human-approval broker | ✅ complete |
-| `bridge/toolset.py` | The gateway tool surface (16 tools, 26 methods) | ✅ complete |
+| `bridge/toolset.py` | The gateway tool surface (22 tools, 39 methods) | ✅ complete |
 | `gateway.py` | Assembly: request → ledger → safety → approval → act | ✅ complete |
 | `drivers/simulated/` | Microscope, plate reader, liquid handler, incubator | ✅ complete |
-| `drivers/` | SCPI, WoT, MicroManager, SiLA2, OPC UA LADS, Opentrons | ⬜ |
+| `drivers/` | SCPI, WoT, MicroManager, SiLA2, OPC UA LADS, Opentrons | ✅ complete |
 | `configs/` | A complete four-instrument simulated lab | ✅ complete |
-| `memory/` | Durable notes and documents an agent can search | 🔨 building |
-| `experiment/` | Protocols, runs, replay | ⬜ |
-| `cli.py` | `serve` · `doctor` · `devices` · `tools` · `ledger` · `call` | ✅ complete |
-| `tests/` | Test suite | ⬜ |
+| `memory/` | Durable notes and documents an agent can search (SQLite, filesystem) | ✅ complete |
+| `experiment/` | Protocols, runs, replay | ✅ complete |
+| `cli.py` | `serve` · `doctor` · `devices` · `tools` · `ledger` · `call` · `experiment run` | ✅ complete |
+| `tests/` | Test suite (295 tests: unit, real-protocol integration, CLI) | ✅ complete |
 
 ---
 
@@ -72,6 +77,28 @@ Every lab-automation standard converged on the same three nouns:
 LabBench adopts that triple as its internal model and treats each real protocol
 as a *projection* of it. Adding SCPI support means writing one projection, not
 touching anything an agent sees.
+
+Six protocols ship today, and they split into two families depending on
+whether the wire protocol carries a capability model of its own:
+
+| Driver | Family | Capability model comes from |
+|---|---|---|
+| `scpi` | grammar, no schema | a built-in profile per instrument class (dmm, oscilloscope, power supply, function generator), overridable in YAML |
+| `wot` | self-describing | the Thing's own Thing Description (JSON), fetched at connect time |
+| `opcua_lads` | self-describing | browsing the server's own address space (`DeviceSet` → `FunctionalUnitSet` → Variables/Methods) |
+| `sila2` | self-describing | the server's Feature Definition, discovered via `SiLAService.GetFeatureDefinition` |
+| `micromanager` | vendor core API | the loaded `.cfg` file, via `pymmcore-plus`; feature layout mirrors the simulated microscope |
+| `opentrons` | vendor HTTP API | the robot server's `runs`/`actions` state machine |
+
+A self-describing protocol still cannot say *how dangerous* a command is —
+OPC UA has no hazard vocabulary, and a SiLA FDL does not know that a command
+consumes a reagent — so hazard class and reversibility come from
+`profile_overrides` in the lab configuration for every driver in that family,
+the same way an SCPI profile supplies its capability model outright. Every
+driver is honest about a related, sharper limit too: none of the real
+protocols carry a digital twin, so `simulate()` reports `fidelity: "none"`
+and the safety kernel escalates to a human exactly as it does for a
+not-yet-classified command, rather than fabricating a prediction.
 
 **Device classes — `Feature`, the thing that makes instruments substitutable.**
 Capabilities are grouped by *function*, not by model number. An agent that can
@@ -137,6 +164,42 @@ ALCOA+ ask for, and what a reproducibility claim needs regardless of regulation.
 
 ---
 
+## Memory and experiments
+
+Two layers sit on top of the device model, for the same reason a lab notebook
+and a written protocol sit on top of raw bench work.
+
+**`memory/` — durable, searchable notes.** `ledger.note` is a timestamped,
+immutable entry in the audit trail — right for "what happened," wrong for
+"what did we learn." `memory.write` / `memory.search` are the searchable,
+curatable complement: an SOP, a calibration offset, why a field of the plate
+was excluded. Two backends ship — `SqliteMemory` (queryable, the default) and
+`FilesystemDocs` (one Markdown file per note, so a human can read or edit the
+lab's memory in any editor and `git diff` it) — and a lab that configures
+neither still gets one, because durable notes are infrastructure an agent
+should never have to ask an operator to set up.
+
+**`experiment/` — protocols and runs.** A `Protocol` is a named, checkable
+sequence of `device.invoke` calls (`experiment.validate` catches an unknown
+device or an out-of-envelope literal before the first motor turns;
+`experiment.dry_run` asks every step's digital twin whether the plan still
+looks feasible, without touching hardware). Running one (`experiment.start`)
+crosses the exact same ledger/safety-kernel/approval path a direct
+`device.invoke` would — a run is a disciplined caller of that front door, not
+a second one. A step whose hazard needs a human signature parks the *whole
+run* rather than failing it or blocking forever; `experiment.resume` continues
+it once `approval.grant` has answered. `experiment.replay` reconstructs
+exactly what a finished run did from the tamper-evident ledger alone — it
+never re-executes anything, because replaying a protocol's physical actions
+under yesterday's approval is precisely the mistake the approval broker's
+digest binding exists to prevent for a single call.
+
+```bash
+labbench experiment run -c configs/simulated-lab.yaml protocol.yaml
+```
+
+---
+
 ## Design decisions worth knowing
 
 **The tool surface is fixed, not generated per command.** A six-instrument lab
@@ -183,6 +246,10 @@ install it; a lab with no hardware attached still starts.
 ```bash
 pip install labbench              # gateway + simulated instruments
 pip install 'labbench[scpi]'      # + oscilloscopes, power supplies, DMMs
+pip install 'labbench[micromanager]'  # + Micro-Manager microscopes (pymmcore-plus)
+pip install 'labbench[opcua]'     # + OPC UA LADS devices (asyncua)
+pip install 'labbench[sila2]'     # + SiLA 2 servers
+pip install 'labbench[http]'      # + WoT Things and Opentrons robots (httpx)
 pip install 'labbench[all]'       # + every supported protocol
 ```
 
@@ -224,6 +291,25 @@ And read back everything that happened, with the chain intact:
 labbench ledger query
 labbench ledger verify
 ```
+
+---
+
+## Developing
+
+```bash
+uv sync --extra dev --extra all   # gateway + every optional instrument library + pytest/ruff
+uv run pytest                     # 295 tests: unit, real-protocol integration, CLI
+uv run ruff check src tests
+```
+
+Most driver tests run against the real thing rather than a mock: a real
+`asyncua.Server` for OPC UA LADS, a real `pymmcore-plus` core against the
+Micro-Manager demo device adapters (`mmcore install` fetches them once), a
+real threaded HTTP server for WoT. Where a real server is impractical in CI
+(SiLA 2's server side needs code generated from a Feature Definition, which
+pulls in `black`/`jinja2`/`isort` for a one-off check) the test fakes the
+narrowest possible seam — the parsed object graph the vendor client builds —
+and says so in the test module's docstring.
 
 ---
 
