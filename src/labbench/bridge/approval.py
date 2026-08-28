@@ -41,6 +41,21 @@ from ..core.errors import ApprovalDenied, LabBenchError
 from ..protocol.jsonrpc import serialise
 
 
+def _format_seconds(seconds: float) -> str:
+    """Human-readable duration for the audit trail.
+
+    A sub-second window rounded with `.0f` reads as "0s", which in a ledger
+    looks like a bug rather than a short timeout.
+    """
+    if seconds < 1:
+        return f"{seconds:.1f}s"
+    if seconds < 90:
+        return f"{seconds:.0f}s"
+    if seconds < 5400:
+        return f"{seconds / 60:.0f}min"
+    return f"{seconds / 3600:.1f}h"
+
+
 class ApprovalState(str, Enum):
     PENDING = "pending"
     GRANTED = "granted"
@@ -191,7 +206,7 @@ class ApprovalBroker:
             window = req.expires_at - req.created
             return await self._resolve(
                 approval_id, ApprovalState.EXPIRED, "system",
-                f"no answer within {window:.0f}s; denied by default",
+                f"no answer within {_format_seconds(window)}; denied by default",
             )
 
     async def request_and_wait(self, **kwargs: Any) -> ApprovalRequest:
