@@ -1,0 +1,53 @@
+[project]
+name = "labbench"
+version = "0.1.0"
+description = "LabBench - a research-grade Model Context Protocol gateway between AI agents and laboratory hardware."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+dependencies = [
+    "mcp[cli]>=2.1.1",
+    "pydantic>=2.9",
+    "anyio>=4.4",
+    "httpx>=0.27",
+    "pyyaml>=6.0",
+    "numpy>=1.26",
+]
+
+[project.optional-dependencies]
+micromanager = ["pymmcore-plus>=0.13", "useq-schema>=0.5"]
+scpi = ["pyvisa>=1.14", "pyvisa-py>=0.7"]
+sila2 = ["sila2>=0.10"]
+opcua = ["asyncua>=1.1"]
+epics = ["ophyd-async>=0.5", "bluesky>=1.13"]
+discovery = ["zeroconf>=0.132"]
+vector = ["numpy>=1.26"]
+imaging = ["tifffile>=2024.1", "imageio>=2.34"]
+all = ["labbench[micromanager,scpi,sila2,opcua,epics,discovery,imaging]"]
+
+[project.scripts]
+labbench = "labbench.cli:main"
+
+[project.entry-points."labbench.drivers"]
+sim_microscope     = "labbench.drivers.simulated.microscope:SimulatedMicroscope"
+sim_plate_reader   = "labbench.drivers.simulated.plate_reader:SimulatedPlateReader"
+sim_liquid_handler = "labbench.drivers.simulated.liquid_handler:SimulatedLiquidHandler"
+sim_incubator      = "labbench.drivers.simulated.incubator:SimulatedIncubator"
+micromanager       = "labbench.drivers.micromanager:MicroManagerMicroscope"
+scpi               = "labbench.drivers.scpi:ScpiInstrument"
+wot                = "labbench.drivers.http_wot:WoTThing"
+sila2              = "labbench.drivers.sila2_adapter:Sila2Device"
+opcua_lads         = "labbench.drivers.opcua_lads:LadsDevice"
+opentrons          = "labbench.drivers.opentrons:OpentronsRobot"
+
+[project.entry-points."labbench.memory"]
+sqlite     = "labbench.memory.sqlite_store:SqliteMemory"
+filesystem = "labbench.memory.filesystem:FilesystemDocs"
+mcp        = "labbench.memory.mcp_proxy:McpMemoryProxy"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/labbench"]

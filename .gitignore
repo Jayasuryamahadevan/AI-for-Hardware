@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+.venv/
+labbench-data/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.jsonl
+.pytest_cache/
+.ruff_cache/
+dist/
+build/
+*.egg-info/
