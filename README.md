@@ -35,8 +35,9 @@ updated as each layer lands.
 | `protocol/` | JSON-RPC 2.0, dispatch router | ✅ complete |
 | `protocol/` | HTTP/1.1 server, SSE, WebSocket (RFC 6455), stdio | ✅ complete |
 | `protocol/client.py` | Client for all three transports, one call surface | ✅ complete |
-| `bridge/` | Tool schemas per AI dialect, approval broker, sessions | 🔨 building |
-| `drivers/simulated/` | Four instruments on a real physics model | ⬜ |
+| `bridge/` | Tool schemas (6 AI dialects), human-approval broker | ✅ complete |
+| `bridge/toolset.py` | The gateway tool surface | 🔨 building |
+| `drivers/simulated/` | Microscope, plate reader, liquid handler, incubator | ✅ complete |
 | `drivers/` | SCPI, WoT, MicroManager, SiLA2, OPC UA LADS, Opentrons | ⬜ |
 | `memory/` | Durable notes and documents an agent can search | ⬜ |
 | `experiment/` | Protocols, runs, replay | ⬜ |
