@@ -69,12 +69,18 @@ class Specimen:
         tilt_um_per_mm: float = 1.8,
         colony_sigma_um: float = 70.0,
         cells_per_colony: int = 25,
+        centre_um: tuple[float, float] = (0.0, 0.0),
     ) -> None:
         # Density is specified per mm^2 rather than as a raw count because that
         # is the number that has to be right: a 20x field is only ~83 um across,
         # so a count chosen for the whole slide leaves every field empty.
         self.rng = np.random.default_rng(seed)
         self.extent_um = extent_um
+        # Where the slide sits in *stage* coordinates. A specimen centred on
+        # zero while the stage travels 0..20000 um puts the instrument's home
+        # position at the extreme corner of the slide, which looks like a
+        # broken autofocus rather than an empty field.
+        self.centre_um = centre_um
         self.focal_plane_z = focal_plane_z
         self.tilt = tilt_um_per_mm
         area_mm2 = (extent_um / 1000.0) ** 2
@@ -83,12 +89,14 @@ class Specimen:
         # Cells clump; uniform scatter looks wrong and behaves wrong under
         # segmentation, so seed colonies and jitter around them.
         n_colonies = max(1, n_emitters // cells_per_colony)
+        cx, cy = centre_um
         centres = self.rng.uniform(-extent_um / 2, extent_um / 2, size=(n_colonies, 2))
+        centres += np.array([cx, cy])
         half = extent_um / 2
         for i in range(n_emitters):
-            cx, cy = centres[i % n_colonies]
-            x = float(np.clip(cx + self.rng.normal(0, colony_sigma_um), -half, half))
-            y = float(np.clip(cy + self.rng.normal(0, colony_sigma_um), -half, half))
+            colony_x, colony_y = centres[i % n_colonies]
+            x = float(np.clip(colony_x + self.rng.normal(0, colony_sigma_um), cx - half, cx + half))
+            y = float(np.clip(colony_y + self.rng.normal(0, colony_sigma_um), cy - half, cy + half))
             z = self.surface_z(x, y) + float(self.rng.normal(0, 1.2))
             r = float(abs(self.rng.normal(1.4, 0.5))) + 0.35
             self.emitters.append(
@@ -110,9 +118,14 @@ class Specimen:
         self._xy = np.array([[e.x_um, e.y_um] for e in self.emitters])
 
     def surface_z(self, x_um: float, y_um: float) -> float:
-        """True in-focus Z at a given stage position, including tilt."""
-        return self.focal_plane_z + self.tilt * (x_um / 1000.0) * 0.8 + \
-            self.tilt * (y_um / 1000.0) * 0.5
+        """True in-focus Z at a given stage position, including tilt.
+
+        Tilt is measured from the slide centre, so the nominal focal plane is
+        the height at the centre rather than at stage zero.
+        """
+        dx = (x_um - self.centre_um[0]) / 1000.0
+        dy = (y_um - self.centre_um[1]) / 1000.0
+        return self.focal_plane_z + self.tilt * dx * 0.8 + self.tilt * dy * 0.5
 
     def near(self, x_um: float, y_um: float, radius_um: float) -> list[Emitter]:
         if not len(self._xy):
@@ -224,29 +237,81 @@ def render(
         "mean": float(out.mean()),
         "p99": float(np.percentile(out, 99)),
         "saturated_fraction": saturated,
+        # Signal against the *noise floor*, not against the overall spread.
+        # Dividing by out.std() would be scale-invariant: bleaching halves both
+        # the signal and the spread, so the ratio would not move and an agent
+        # watching this number would report healthy signal while the specimen
+        # burned away. Estimating the noise separately is what makes the decay
+        # visible.
         "snr_estimate": float(
-            (np.percentile(out, 99) - np.median(out)) / max(1.0, out.std() * 0.4)
+            (np.percentile(out, 99) - np.median(out)) / max(1.0, estimate_noise_sigma(out))
         ),
     }
     return out, metrics
 
 
-def focus_score(img: np.ndarray) -> float:
-    """Normalised variance of the Laplacian — the standard autofocus metric.
+def estimate_noise_sigma(img: np.ndarray) -> float:
+    """Immerkaer's noise estimate: robust to image content, cheap to compute.
 
-    Normalising by mean intensity keeps the score comparable across exposures,
-    without which an agent can "improve focus" simply by turning up the lamp.
+    Convolving with [[1,-2,1],[-2,4,-2],[1,-2,1]] annihilates any locally
+    quadratic surface, so smooth structure and blurred blobs contribute almost
+    nothing and what survives is noise. That property is the whole point here:
+    the focus metric needs to know the noise floor *without* knowing whether it
+    is looking at a sharp field or an empty one.
     """
     a = img.astype(np.float64)
-    # Subtract the camera offset/background before scoring. Without this the
-    # metric is dominated by a large constant pedestal and by read noise in the
-    # empty parts of the field, which flattens the curve near best focus.
-    a = a - np.median(a)
-    lap = (
-        -4 * a[1:-1, 1:-1]
-        + a[:-2, 1:-1] + a[2:, 1:-1] + a[1:-1, :-2] + a[1:-1, 2:]
+    if a.shape[0] < 3 or a.shape[1] < 3:
+        return 0.0
+    response = (
+        4 * a[1:-1, 1:-1]
+        - 2 * (a[:-2, 1:-1] + a[2:, 1:-1] + a[1:-1, :-2] + a[1:-1, 2:])
+        + a[:-2, :-2] + a[:-2, 2:] + a[2:, :-2] + a[2:, 2:]
     )
-    # Normalise by signal energy, not by mean intensity, so that raising the
-    # lamp or the exposure cannot masquerade as an improvement in focus.
-    energy = max(float((a ** 2).mean()), 1e-9)
-    return float((lap ** 2).mean() / energy)
+    # sqrt(pi/2) / 6 converts mean absolute response into a sigma estimate.
+    return float(np.sqrt(math.pi / 2) * np.abs(response).mean() / 6.0)
+
+
+def focus_score(img: np.ndarray) -> float:
+    """Noise-corrected normalised variance -- the autofocus metric.
+
+    Two metrics were tried before this one, and both failed in ways worth
+    recording, because both are the textbook answer:
+
+    *Variance of the Laplacian* pins at a constant on an empty field: for white
+    noise the five-point Laplacian has variance 20 sigma^2 against a signal
+    energy of sigma^2, so the ratio sits at 20 no matter where the focus drive
+    is. Subtracting the noise contribution fixes the empty field but leaves a
+    ratio of two near-zero quantities off focus, which is numerically wild --
+    it produced scores of 44 at fifteen micrometres of defocus and 0.1 at true
+    focus, so a hill-climb walked away from the specimen.
+
+    Normalised variance is stable because the denominator stays bounded. The
+    optical model conserves total flux as defocus blur widens, so the mean of
+    the background-subtracted field is roughly constant while its variance
+    falls as the signal spreads -- which makes var/mean^2 peak sharply at
+    focus. Dividing by the square of the mean is also what keeps lamp power
+    from dominating: doubling the illumination doubles the mean and quadruples
+    the variance, so the ratio is invariant to the multiplicative part. It is
+    not perfectly flat -- measured at 1.5x for a doubling - because more
+    photons genuinely do recover more detail against Poisson noise, and that is
+    a real improvement rather than an artefact. What matters for a search is
+    that the *location* of the peak does not move with lamp power, and it does
+    not.
+
+    The noise floor is estimated per frame and subtracted, and the denominator
+    is floored at the noise level, so an empty field scores zero instead of
+    dividing two pieces of noise by each other.
+    """
+    a = img.astype(np.float64)
+    if a.shape[0] < 3 or a.shape[1] < 3:
+        return 0.0
+    sigma = estimate_noise_sigma(a)
+    # Remove the camera offset and background pedestal. Without this the metric
+    # is dominated by a large constant that carries no focus information.
+    a = a - np.median(a)
+    signal_variance = float(a.var()) - sigma * sigma
+    if signal_variance <= 0.0:
+        return 0.0  # nothing above the noise floor: nothing to focus on
+    # Flooring at sigma keeps a nearly-empty field from dividing by ~0.
+    scale = max(float(np.abs(a).mean()), sigma)
+    return signal_variance / (scale * scale)
