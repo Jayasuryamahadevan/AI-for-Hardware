@@ -21,6 +21,7 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import logging
+import os
 import sys
 from typing import Any
 
@@ -31,10 +32,48 @@ from .router import Router, RpcContext
 log = logging.getLogger("labbench.stdio")
 
 
+class StdinUnavailable(RuntimeError):
+    """Stdin cannot carry a protocol stream on this process."""
+
+
+def stdin_is_usable() -> bool:
+    """Whether stdin can be polled for readability.
+
+    A pipe or a terminal can; a regular file or /dev/null cannot be registered
+    with epoll, which is what a daemonised process usually has. Checking up
+    front turns a confusing asyncio traceback into a decision the caller can
+    make.
+    """
+    try:
+        import selectors
+        import stat
+
+        mode = os.fstat(sys.stdin.fileno()).st_mode
+        if not (stat.S_ISFIFO(mode) or stat.S_ISSOCK(mode) or stat.S_ISCHR(mode)):
+            return False
+        # A character device may still be /dev/null, which epoll refuses.
+        selector = selectors.DefaultSelector()
+        try:
+            selector.register(sys.stdin.fileno(), selectors.EVENT_READ)
+            selector.unregister(sys.stdin.fileno())
+            return True
+        finally:
+            selector.close()
+    except (OSError, ValueError, AttributeError):
+        return False
+
+
 async def _connect_stdin() -> asyncio.StreamReader:
     reader = asyncio.StreamReader()
     loop = asyncio.get_running_loop()
-    await loop.connect_read_pipe(lambda: asyncio.StreamReaderProtocol(reader), sys.stdin)
+    try:
+        await loop.connect_read_pipe(lambda: asyncio.StreamReaderProtocol(reader), sys.stdin)
+    except (PermissionError, OSError, ValueError) as exc:
+        raise StdinUnavailable(
+            f"stdin cannot carry a protocol stream ({exc}). The stdio transport needs "
+            "a pipe from a parent process; a daemon with stdin on /dev/null should use "
+            "the http or ws transport instead."
+        ) from None
     return reader
 
 

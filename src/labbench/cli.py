@@ -1,0 +1,454 @@
+"""Operator entry point.
+
+Argparse rather than a CLI framework, for the same reason the HTTP server is
+hand-written: this is the program someone runs at two in the morning when an
+experiment is misbehaving, and it should depend on as little as possible.
+
+    labbench serve   --config lab.yaml [--transport stdio|http|ws|all]
+    labbench doctor  [--config lab.yaml]
+    labbench devices --config lab.yaml
+    labbench tools   [--dialect anthropic|openai|gemini|jsonschema|openapi]
+    labbench ledger  verify|query
+    labbench call    --config lab.yaml <method> [key=value ...]
+"""
+
+from __future__ import annotations
+
+import argparse
+import asyncio
+import json
+import logging
+import os
+import sys
+from pathlib import Path
+from typing import Any
+
+from . import __version__
+
+LOG_FORMAT = "%(asctime)s %(levelname)-7s %(name)s: %(message)s"
+
+#: Which optional extra provides each driver. The driver name and the extra
+#: are not always the same word, and telling someone to install a
+#: non-existent extra is worse than saying nothing.
+_EXTRA_FOR_DRIVER = {
+    "micromanager": "micromanager",
+    "scpi": "scpi",
+    "sila2": "sila2",
+    "opcua_lads": "opcua",
+    "wot": "http",
+    "opentrons": "http",
+}
+
+
+def _setup_logging(verbosity: int, *, to_stderr: bool = True) -> None:
+    level = logging.WARNING if verbosity == 0 else (
+        logging.INFO if verbosity == 1 else logging.DEBUG
+    )
+    # Always stderr. On the stdio transport stdout carries protocol, and a log
+    # line written there corrupts the session.
+    logging.basicConfig(
+        level=level, format=LOG_FORMAT,
+        stream=sys.stderr if to_stderr else sys.stdout,
+    )
+
+
+def _load_config(path: str | None) -> Any:
+    from .core.registry import LabConfig
+
+    if path is None:
+        return LabConfig()
+    config_path = Path(path).expanduser()
+    if not config_path.exists():
+        raise SystemExit(f"labbench: no such config file: {config_path}")
+    try:
+        return LabConfig.load(config_path)
+    except Exception as exc:
+        raise SystemExit(f"labbench: {config_path} is not a valid lab config: {exc}") from None
+
+
+def _emit(payload: Any, *, compact: bool = False) -> None:
+    print(json.dumps(payload, indent=None if compact else 2, default=str))
+
+
+# -- serve -----------------------------------------------------------------
+
+
+async def _serve(args: argparse.Namespace) -> int:
+    from .gateway import Gateway
+    from .protocol.http import HttpServer
+    from .protocol.stdio import StdioServer
+    from .protocol.websocket import WebSocketEndpoint
+
+    config = _load_config(args.config)
+    gateway = Gateway(config, data_dir=args.data_dir)
+    boot = await gateway.start()
+
+    for device_id, state in boot["connected"].items():
+        (log.warning if state.startswith("error") else log.info)(
+            "device %s: %s", device_id, state
+        )
+    for device_id, problem in boot["unavailable"].items():
+        log.warning("device %s unavailable: %s", device_id, problem)
+
+    transports = (
+        ["stdio", "http", "ws"] if args.transport == "all" else [args.transport]
+    )
+    http_server: HttpServer | None = None
+    tasks: list[asyncio.Task[Any]] = []
+
+    if "http" in transports or "ws" in transports:
+        token = args.token or os.environ.get("LABBENCH_TOKEN")
+        http_server = HttpServer(
+            gateway.router, host=args.host, port=args.port, token=token,
+            server_name=f"labbench/{__version__}",
+        )
+        if "ws" in transports:
+            endpoint = WebSocketEndpoint(gateway.router)
+            http_server.set_upgrade_handler(endpoint.handle_upgrade)
+            gateway.add_event_sink(endpoint.broadcast)
+        gateway.add_event_sink(http_server.broadcast)
+        await http_server.start()
+        print(
+            f"labbench: serving {config.name} on {http_server.url}\n"
+            f"  POST {http_server.url}/rpc      JSON-RPC 2.0\n"
+            f"  GET  {http_server.url}/events   live event stream (SSE)\n"
+            f"  GET  {http_server.url}/healthz  liveness\n"
+            f"  auth: {'bearer token' if token else 'none (loopback only)'}",
+            file=sys.stderr,
+        )
+        tasks.append(asyncio.create_task(http_server.serve_forever()))
+
+    if "stdio" in transports:
+        from .protocol.stdio import stdin_is_usable
+
+        if stdin_is_usable():
+            print(f"labbench: serving {config.name} over stdio", file=sys.stderr)
+            tasks.append(asyncio.create_task(StdioServer(gateway.router).serve()))
+        elif args.transport == "stdio":
+            # Explicitly asked for, and impossible: that is an error.
+            raise SystemExit(
+                "labbench: stdin is not a pipe, so the stdio transport cannot run. "
+                "Use --transport http or --transport ws for a daemon."
+            )
+        else:
+            # Part of --transport all: skip it and say so once, rather than
+            # letting asyncio log a traceback nobody can act on.
+            log.info("stdin is not a pipe; skipping the stdio transport")
+
+    try:
+        if not tasks:
+            raise SystemExit("labbench: no transport selected")
+        # Whichever finishes first ends the process: a closed stdin means the
+        # parent went away, and there is no one left to serve.
+        done, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+        for task in pending:
+            task.cancel()
+        for task in done:
+            if task.exception() is not None:
+                raise task.exception()  # type: ignore[misc]
+    except (KeyboardInterrupt, asyncio.CancelledError):
+        print("\nlabbench: shutting down", file=sys.stderr)
+    finally:
+        if http_server is not None:
+            await http_server.close()
+        await gateway.close()
+    return 0
+
+
+# -- doctor ----------------------------------------------------------------
+
+
+async def _doctor(args: argparse.Namespace) -> int:
+    """Report what is installed, what is not, and what that costs you."""
+    from .core.registry import DriverRegistry
+
+    ok = True
+    print(f"labbench {__version__}")
+    print(f"  python      {sys.version.split()[0]} at {sys.executable}")
+
+    print("\nruntime dependencies")
+    for module, purpose in (
+        ("pydantic", "capability model and validation"),
+        ("yaml", "lab configuration"),
+        ("numpy", "simulated instrument physics"),
+    ):
+        try:
+            mod = __import__(module)
+            version = getattr(mod, "__version__", "?")
+            print(f"  [ok]   {module:12s} {version:10s} {purpose}")
+        except ImportError:
+            ok = False
+            print(f"  [MISS] {module:12s} {'':10s} {purpose}")
+
+    print("\ndrivers")
+    catalog = DriverRegistry().catalog()
+    for name in catalog["available"]:
+        print(f"  [ok]   {name}")
+    for name, problem in sorted(catalog["unavailable"].items()):
+        extra = _EXTRA_FOR_DRIVER.get(name, name.split("_")[0])
+        print(f"  [--]   {name:18s} {problem[:60]}")
+        print(f"         install with: pip install 'labbench[{extra}]'")
+    if not catalog["available"]:
+        ok = False
+        print("  no drivers available at all - the package may be installed incorrectly")
+
+    print("\noptional instrument libraries")
+    for module, extra in (
+        ("pyvisa", "scpi"), ("pymmcore_plus", "micromanager"), ("sila2", "sila2"),
+        ("asyncua", "opcua"), ("zeroconf", "discovery"), ("httpx", "http"),
+        ("tifffile", "imaging"),
+    ):
+        try:
+            __import__(module)
+            print(f"  [ok]   {module}")
+        except ImportError:
+            print(f"  [--]   {module:16s} pip install 'labbench[{extra}]'")
+
+    if args.config:
+        print(f"\nconfiguration: {args.config}")
+        config = _load_config(args.config)
+        print(f"  lab         {config.name}")
+        print(f"  devices     {len(config.devices)}")
+        from .core.safety import SafetyPolicy
+
+        policy = SafetyPolicy.model_validate(config.safety or {})
+        print(f"  autonomy    {int(policy.autonomy)} ({policy.autonomy.name})")
+        print(f"  ceiling     {policy.ceiling().value}")
+        print(f"  rules       {len(policy.rules)}")
+        if not policy.approve_irreversible:
+            print("  [warn] approve_irreversible is false: irreversible actions will run "
+                  "without a signature.")
+            print("         This is only defensible when every device is simulated.")
+        registry = DriverRegistry()
+        for device in config.devices:
+            try:
+                registry.get(device.driver)
+                print(f"  [ok]   {device.id:12s} -> {device.driver}")
+            except Exception as exc:
+                ok = False
+                print(f"  [FAIL] {device.id:12s} -> {device.driver}: {exc}")
+
+    print("\n" + ("all good" if ok else "problems found - see [MISS]/[FAIL] above"))
+    return 0 if ok else 1
+
+
+# -- devices ---------------------------------------------------------------
+
+
+async def _devices(args: argparse.Namespace) -> int:
+    from .gateway import Gateway
+
+    gateway = Gateway(_load_config(args.config), data_dir=args.data_dir)
+    await gateway.start()
+    try:
+        description = gateway.describe()
+        if args.json:
+            _emit(description)
+            return 0
+        print(f"{description['lab']}  autonomy {description['autonomy']['level']} "
+              f"({description['autonomy']['name']}), "
+              f"ceiling {description['autonomy']['hazard_ceiling']}")
+        for device in description["devices"]:
+            flag = " [SIM]" if device["simulated"] else ""
+            print(f"\n  {device['id']}{flag}  {device['display_name']}")
+            print(f"    kind    {device['kind']}   state {device['state']}"
+                  + (f"   FAULT: {device['fault']}" if device["fault"] else ""))
+            for feature in device["features"]:
+                detail = gateway.device(device["id"]).features()[feature]
+                commands = ", ".join(c.name for c in detail.commands)
+                print(f"    {feature:18s} {commands}")
+        return 0
+    finally:
+        await gateway.close()
+
+
+# -- tools -----------------------------------------------------------------
+
+
+async def _tools(args: argparse.Namespace) -> int:
+    from .bridge.schema import emit
+    from .bridge.toolset import tool_specs
+    from .gateway import Gateway
+
+    gateway = Gateway(_load_config(args.config), data_dir=args.data_dir)
+    if args.config:
+        await gateway.start()
+    try:
+        _emit(emit(tool_specs(gateway), args.dialect, strict=args.strict))
+        return 0
+    finally:
+        await gateway.close()
+
+
+# -- ledger ----------------------------------------------------------------
+
+
+async def _ledger(args: argparse.Namespace) -> int:
+    from .core.provenance import Ledger
+
+    path = Path(args.path or Path(args.data_dir or "./labbench-data") / "provenance.sqlite")
+    if not path.exists():
+        raise SystemExit(f"labbench: no ledger at {path}")
+    ledger = Ledger(path)
+    try:
+        if args.ledger_command == "verify":
+            result = ledger.verify()
+            _emit(result)
+            if not result["valid"]:
+                print(
+                    f"\nTHE CHAIN IS BROKEN at record {result['broken_at']}: "
+                    f"{result['reason']}\nRecords at or after this point cannot be trusted.",
+                    file=sys.stderr,
+                )
+                return 2
+            print(f"\nchain intact across {result['records']} records", file=sys.stderr)
+            return 0
+        records = ledger.query(
+            run_id=args.run, device_id=args.device, kind=args.kind, limit=args.limit
+        )
+        if args.json:
+            _emit([r.model_dump(mode="json") for r in records])
+            return 0
+        for record in records:
+            import time as _time
+
+            stamp = _time.strftime("%H:%M:%S", _time.localtime(record.timestamp))
+            target = ".".join(x for x in (record.device_id, record.feature, record.command) if x)
+            print(f"  {record.seq:>5} {stamp} {record.kind:<16} {record.actor:<18} {target}"
+                  + (f"  // {record.reason}" if record.reason else ""))
+        return 0
+    finally:
+        ledger.close()
+
+
+# -- call ------------------------------------------------------------------
+
+
+async def _call(args: argparse.Namespace) -> int:
+    """Invoke one gateway method from the shell. The debugging tool."""
+    from .gateway import Gateway
+    from .protocol.jsonrpc import Request
+    from .protocol.router import RpcContext
+
+    params: dict[str, Any] = {}
+    for pair in args.params:
+        if "=" not in pair:
+            raise SystemExit(f"labbench: expected key=value, got {pair!r}")
+        key, _, raw = pair.partition("=")
+        try:
+            params[key] = json.loads(raw)
+        except json.JSONDecodeError:
+            params[key] = raw  # a bare string is the common case
+
+    gateway = Gateway(_load_config(args.config), data_dir=args.data_dir)
+    await gateway.start()
+    try:
+        context = RpcContext(actor=args.actor, transport="cli")
+        response = await gateway.router.dispatch(Request(args.method, params, id=1), context)
+        assert response is not None
+        payload = response.to_dict()
+        if context.buffered:
+            payload["notifications"] = context.buffered
+        _emit(payload)
+        return 1 if "error" in payload else 0
+    finally:
+        await gateway.close()
+
+
+# -- argument parsing ------------------------------------------------------
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="labbench",
+        description="Connect any AI agent to laboratory hardware.",
+    )
+    parser.add_argument("--version", action="version", version=f"labbench {__version__}")
+    parser.add_argument("-v", "--verbose", action="count", default=0,
+                        help="-v for info, -vv for debug. Always to stderr.")
+    parser.add_argument("--data-dir", default=None,
+                        help="Where the ledger and artifacts live.")
+
+    # The same flags on every subcommand as well as the top level, so both
+    # `labbench --data-dir X serve` and `labbench serve --data-dir X` work.
+    # Requiring one particular order is the kind of papercut that makes a tool
+    # feel hostile at two in the morning.
+    common = argparse.ArgumentParser(add_help=False)
+    common.add_argument("-v", "--verbose", action="count", default=0,
+                        help=argparse.SUPPRESS)
+    common.add_argument("--data-dir", default=None, help=argparse.SUPPRESS)
+
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    serve = sub.add_parser("serve", parents=[common], help="Run the gateway.")
+    serve.add_argument("-c", "--config", required=True, help="Lab configuration YAML.")
+    serve.add_argument("-t", "--transport", default="http",
+                       choices=["stdio", "http", "ws", "all"],
+                       help="stdio for a local agent, ws for duplex, http for anything else.")
+    serve.add_argument("--host", default="127.0.0.1",
+                       help="Binding off-loopback requires --token.")
+    serve.add_argument("--port", type=int, default=8765)
+    serve.add_argument("--token", default=None,
+                       help="Bearer token. Also read from LABBENCH_TOKEN.")
+    serve.set_defaults(func=_serve)
+
+    doctor = sub.add_parser("doctor", parents=[common], help="Check the installation and a config.")
+    doctor.add_argument("-c", "--config", default=None)
+    doctor.set_defaults(func=_doctor)
+
+    devices = sub.add_parser("devices", parents=[common], help="List instruments and their capabilities.")
+    devices.add_argument("-c", "--config", required=True)
+    devices.add_argument("--json", action="store_true")
+    devices.set_defaults(func=_devices)
+
+    tools = sub.add_parser("tools", parents=[common], help="Print tool schemas in an AI dialect.")
+    tools.add_argument("-c", "--config", default=None)
+    tools.add_argument("-d", "--dialect", default="jsonschema",
+                       choices=["anthropic", "openai", "openai-responses", "gemini",
+                                "jsonschema", "openapi"])
+    tools.add_argument("--strict", action="store_true",
+                       help="OpenAI strict mode: guaranteed schema adherence.")
+    tools.set_defaults(func=_tools)
+
+    ledger = sub.add_parser("ledger", parents=[common], help="Read or verify the provenance ledger.")
+    ledger.add_argument("ledger_command", choices=["verify", "query"])
+    ledger.add_argument("--path", default=None, help="Path to provenance.sqlite.")
+    ledger.add_argument("--run", default=None)
+    ledger.add_argument("--device", default=None)
+    ledger.add_argument("--kind", default=None)
+    ledger.add_argument("--limit", type=int, default=100)
+    ledger.add_argument("--json", action="store_true")
+    ledger.set_defaults(func=_ledger)
+
+    call = sub.add_parser("call", parents=[common], help="Invoke one gateway method and print the reply.")
+    call.add_argument("-c", "--config", required=True)
+    call.add_argument("method", help="e.g. lab.describe, device.read")
+    call.add_argument("params", nargs="*", help="key=value; values are parsed as JSON.")
+    call.add_argument("--actor", default="human:cli")
+    call.set_defaults(func=_call)
+
+    return parser
+
+
+log = logging.getLogger("labbench.cli")
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+    _setup_logging(args.verbose)
+    try:
+        return asyncio.run(args.func(args))
+    except KeyboardInterrupt:
+        return 130
+    except SystemExit:
+        raise
+    except Exception as exc:
+        if args.verbose:
+            raise
+        # A traceback is noise for an operator; -v gets you the real thing.
+        print(f"labbench: {type(exc).__name__}: {exc}", file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

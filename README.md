@@ -43,7 +43,7 @@ updated as each layer lands.
 | `configs/` | A complete four-instrument simulated lab | ✅ complete |
 | `memory/` | Durable notes and documents an agent can search | 🔨 building |
 | `experiment/` | Protocols, runs, replay | ⬜ |
-| `cli.py` | `serve` · `doctor` · `tools` · `ledger` | ⬜ |
+| `cli.py` | `serve` · `doctor` · `devices` · `tools` · `ledger` · `call` | ✅ complete |
 | `tests/` | Test suite | ⬜ |
 
 ---
@@ -184,6 +184,45 @@ install it; a lab with no hardware attached still starts.
 pip install labbench              # gateway + simulated instruments
 pip install 'labbench[scpi]'      # + oscilloscopes, power supplies, DMMs
 pip install 'labbench[all]'       # + every supported protocol
+```
+
+---
+
+## Running it
+
+```bash
+labbench doctor -c configs/simulated-lab.yaml   # what is installed, what is not
+labbench devices -c configs/simulated-lab.yaml  # instruments and their commands
+labbench serve   -c configs/simulated-lab.yaml  # start the gateway
+```
+
+Point an agent at it:
+
+```bash
+# Tool schemas in your model's dialect - hand these straight to the model
+labbench tools --dialect anthropic
+labbench tools --dialect openai --strict
+labbench tools --dialect gemini
+
+# Or drive it directly
+curl -XPOST localhost:8765/rpc \
+  -d '{"jsonrpc":"2.0","method":"lab.describe","id":1}'
+
+curl -N localhost:8765/events    # live device events, job progress, approvals
+```
+
+One call, from discovery to action:
+
+```bash
+labbench call -c configs/simulated-lab.yaml device.invoke \
+  device=scope1 feature=MotionControl command=home reason="prepare for imaging"
+```
+
+And read back everything that happened, with the chain intact:
+
+```bash
+labbench ledger query
+labbench ledger verify
 ```
 
 ---

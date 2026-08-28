@@ -38,7 +38,13 @@ CAMERA_PIXEL_UM = 6.5  # physical sensor pitch, typical sCMOS
 
 @dataclass
 class Emitter:
-    """One fluorescent object — a cell nucleus, a bead, a punctum."""
+    """One fluorescent object -- a cell nucleus, a bead, a punctum.
+
+    Kept as a value type for readability at the call site. The specimen itself
+    stores emitters as parallel numpy arrays, not as a million of these: a
+    20 mm slide at realistic density is nearly a million objects, and building
+    that many Python objects took tens of seconds at gateway startup.
+    """
 
     x_um: float
     y_um: float
@@ -54,9 +60,16 @@ class Specimen:
     """A synthetic slide: emitters scattered over a slightly tilted focal plane.
 
     The tilt is deliberate. A perfectly flat sample makes autofocus trivial and
-    hides the failure mode that matters in real tiling — focus drift across the
-    field. With tilt, an agent that autofocuses once and then tiles 5 mm will
-    produce visibly bad images, which is exactly the lesson worth simulating.
+    hides the failure mode that matters in real tiling -- focus drift across the
+    field. With tilt, an agent that autofocuses once and then tiles five
+    millimetres produces visibly bad images, which is exactly the lesson worth
+    simulating.
+
+    Emitters live in parallel numpy arrays rather than as objects. At a
+    realistic 3000 cells/mm^2 over a 20 mm slide that is nearly a million
+    emitters, and constructing them one at a time made the gateway take half a
+    minute to start. Vectorised, the same slide is built in milliseconds and
+    a field lookup is a single boolean mask.
     """
 
     def __init__(
@@ -76,46 +89,56 @@ class Specimen:
         # so a count chosen for the whole slide leaves every field empty.
         self.rng = np.random.default_rng(seed)
         self.extent_um = extent_um
+        self.focal_plane_z = focal_plane_z
+        self.tilt = tilt_um_per_mm
         # Where the slide sits in *stage* coordinates. A specimen centred on
         # zero while the stage travels 0..20000 um puts the instrument's home
         # position at the extreme corner of the slide, which looks like a
         # broken autofocus rather than an empty field.
         self.centre_um = centre_um
-        self.focal_plane_z = focal_plane_z
-        self.tilt = tilt_um_per_mm
+        cx, cy = centre_um
+        half = extent_um / 2
+
         area_mm2 = (extent_um / 1000.0) ** 2
-        n_emitters = max(1, int(density_per_mm2 * area_mm2))
-        self.emitters: list[Emitter] = []
+        count = max(1, int(density_per_mm2 * area_mm2))
         # Cells clump; uniform scatter looks wrong and behaves wrong under
         # segmentation, so seed colonies and jitter around them.
-        n_colonies = max(1, n_emitters // cells_per_colony)
-        cx, cy = centre_um
-        centres = self.rng.uniform(-extent_um / 2, extent_um / 2, size=(n_colonies, 2))
-        centres += np.array([cx, cy])
-        half = extent_um / 2
-        for i in range(n_emitters):
-            colony_x, colony_y = centres[i % n_colonies]
-            x = float(np.clip(colony_x + self.rng.normal(0, colony_sigma_um), cx - half, cx + half))
-            y = float(np.clip(colony_y + self.rng.normal(0, colony_sigma_um), cy - half, cy + half))
-            z = self.surface_z(x, y) + float(self.rng.normal(0, 1.2))
-            r = float(abs(self.rng.normal(1.4, 0.5))) + 0.35
-            self.emitters.append(
-                Emitter(
-                    x_um=x, y_um=y, z_um=z, radius_um=r,
-                    brightness={
-                        # Integrated photon budget per emitter, not peak value:
-                        # `render` conserves total intensity as blur widens, so
-                        # these must be large enough to stay above shot noise
-                        # when spread over a defocused disc.
-                        "BF": 60_000.0,
-                        "DAPI": float(abs(self.rng.normal(75_000, 18_000))),
-                        "FITC": float(abs(self.rng.normal(52_000, 22_000))),
-                        "TRITC": float(abs(self.rng.normal(31_000, 14_000))),
-                        "Cy5": float(abs(self.rng.normal(18_000, 9_000))),
-                    },
-                )
-            )
-        self._xy = np.array([[e.x_um, e.y_um] for e in self.emitters])
+        colonies = max(1, count // cells_per_colony)
+        centres = self.rng.uniform(-half, half, size=(colonies, 2)) + np.array([cx, cy])
+        assignment = np.arange(count) % colonies
+
+        self.x = np.clip(
+            centres[assignment, 0] + self.rng.normal(0, colony_sigma_um, count),
+            cx - half, cx + half,
+        )
+        self.y = np.clip(
+            centres[assignment, 1] + self.rng.normal(0, colony_sigma_um, count),
+            cy - half, cy + half,
+        )
+        self.z = self.surface_z_array(self.x, self.y) + self.rng.normal(0, 1.2, count)
+        self.radius = np.abs(self.rng.normal(1.4, 0.5, count)) + 0.35
+        #: Fraction of fluorophore remaining per emitter.
+        self.bleach = np.ones(count)
+        #: Integrated photon budget per emitter, per channel -- not a peak
+        #: value: `render` conserves total intensity as blur widens, so these
+        #: must be large enough to stay above shot noise when spread over a
+        #: defocused disc.
+        self.brightness: dict[str, np.ndarray] = {
+            "BF": np.full(count, 60_000.0),
+            "DAPI": np.abs(self.rng.normal(75_000, 18_000, count)),
+            "FITC": np.abs(self.rng.normal(52_000, 22_000, count)),
+            "TRITC": np.abs(self.rng.normal(31_000, 14_000, count)),
+            "Cy5": np.abs(self.rng.normal(18_000, 9_000, count)),
+        }
+
+    @property
+    def count(self) -> int:
+        return int(self.x.size)
+
+    def surface_z_array(self, x_um: np.ndarray, y_um: np.ndarray) -> np.ndarray:
+        dx = (x_um - self.centre_um[0]) / 1000.0
+        dy = (y_um - self.centre_um[1]) / 1000.0
+        return self.focal_plane_z + self.tilt * dx * 0.8 + self.tilt * dy * 0.5
 
     def surface_z(self, x_um: float, y_um: float) -> float:
         """True in-focus Z at a given stage position, including tilt.
@@ -127,11 +150,38 @@ class Specimen:
         dy = (y_um - self.centre_um[1]) / 1000.0
         return self.focal_plane_z + self.tilt * dx * 0.8 + self.tilt * dy * 0.5
 
+    def near_indices(self, x_um: float, y_um: float, radius_um: float) -> np.ndarray:
+        """Indices of emitters within `radius_um` of a stage position."""
+        if not self.count:
+            return np.empty(0, dtype=np.intp)
+        # A cheap bounding-box reject before the hypot: at a million emitters
+        # the square root is the expensive part and almost every emitter fails.
+        box = (
+            (np.abs(self.x - x_um) <= radius_um) & (np.abs(self.y - y_um) <= radius_um)
+        )
+        candidates = np.nonzero(box)[0]
+        if not candidates.size:
+            return candidates
+        dx = self.x[candidates] - x_um
+        dy = self.y[candidates] - y_um
+        return candidates[(dx * dx + dy * dy) <= radius_um * radius_um]
+
     def near(self, x_um: float, y_um: float, radius_um: float) -> list[Emitter]:
-        if not len(self._xy):
-            return []
-        d = np.hypot(self._xy[:, 0] - x_um, self._xy[:, 1] - y_um)
-        return [self.emitters[i] for i in np.nonzero(d <= radius_um)[0]]
+        """Emitters near a position, as value objects.
+
+        Convenient for inspection and tests. `render` uses `near_indices` and
+        the arrays directly, because materialising objects per frame would
+        undo the point of storing them as arrays.
+        """
+        return [
+            Emitter(
+                x_um=float(self.x[i]), y_um=float(self.y[i]), z_um=float(self.z[i]),
+                radius_um=float(self.radius[i]),
+                brightness={c: float(v[i]) for c, v in self.brightness.items()},
+                bleach=float(self.bleach[i]),
+            )
+            for i in self.near_indices(x_um, y_um, radius_um)
+        ]
 
 
 def depth_of_field_um(wavelength_nm: float, na: float, n: float = 1.0) -> float:
@@ -183,18 +233,22 @@ def render(
     ys = (np.arange(height) - height / 2) * px_um + y_um
     xs = (np.arange(width) - width / 2) * px_um + x_um
 
-    for e in specimen.near(x_um, y_um, radius_um=max(fov_w, fov_h)):
-        base = e.brightness.get(channel, 0.0) * (e.bleach if apply_bleaching else 1.0)
+    visible = specimen.near_indices(x_um, y_um, radius_um=max(fov_w, fov_h))
+    channel_brightness = specimen.brightness.get(channel)
+    for i in visible:
+        base = float(channel_brightness[i]) if channel_brightness is not None else 0.0
+        if apply_bleaching:
+            base *= float(specimen.bleach[i])
         if base <= 0:
             continue
         # Axial response: emitters off the focal plane contribute less and wider.
-        dz = z_um - e.z_um
+        dz = z_um - float(specimen.z[i])
         axial = 1.0 / (1.0 + (dz / max(dof, 0.3)) ** 2)
-        eff_sigma_px = math.hypot(sigma_px, e.radius_um / px_um)
+        eff_sigma_px = math.hypot(sigma_px, float(specimen.radius[i]) / px_um)
         if eff_sigma_px > 60:  # too diffuse to matter; skip for speed
             continue
-        cx = (e.x_um - xs[0]) / px_um
-        cy = (e.y_um - ys[0]) / px_um
+        cx = (float(specimen.x[i]) - xs[0]) / px_um
+        cy = (float(specimen.y[i]) - ys[0]) / px_um
         r = int(min(4 * eff_sigma_px, 80))
         x0, x1 = max(0, int(cx) - r), min(width, int(cx) + r + 1)
         y0, y1 = max(0, int(cy) - r), min(height, int(cy) + r + 1)
@@ -225,8 +279,11 @@ def render(
     # Bleach what we just illuminated.
     if apply_bleaching and bleach_rate > 0:
         dose = photon_scale * bleach_rate
-        for e in specimen.near(x_um, y_um, radius_um=max(fov_w, fov_h) / 2):
-            e.bleach = float(max(0.02, e.bleach * math.exp(-dose)))
+        illuminated = specimen.near_indices(x_um, y_um, radius_um=max(fov_w, fov_h) / 2)
+        if illuminated.size:
+            specimen.bleach[illuminated] = np.maximum(
+                0.02, specimen.bleach[illuminated] * math.exp(-dose)
+            )
 
     metrics = {
         "focus_score": focus_score(out),
