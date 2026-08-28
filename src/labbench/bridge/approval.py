@@ -114,7 +114,7 @@ class ApprovalRequest(BaseModel):
         return max(0.0, self.expires_at - time.time())
 
     def summary(self) -> dict[str, Any]:
-        return {
+        out: dict[str, Any] = {
             "approval_id": self.id,
             "state": self.state.value,
             "device": self.device,
@@ -125,8 +125,17 @@ class ApprovalRequest(BaseModel):
             "intent": self.intent,
             "reasons": self.reasons,
             "prompt": self.prompt,
-            "expires_in_s": round(self.seconds_remaining, 1),
         }
+        if self.state is ApprovalState.PENDING:
+            out["expires_in_s"] = round(self.seconds_remaining, 1)
+        else:
+            # Who signed and why is the whole point of the record once the
+            # question has been answered; a summary that omitted it would send
+            # an auditor back to the ledger for the one field they came for.
+            out["decided_by"] = self.decided_by
+            out["decided_at"] = self.decided_at
+            out["decision_reason"] = self.decision_reason
+        return out
 
 
 Broadcaster = Callable[[str, dict[str, Any]], Awaitable[Any]]

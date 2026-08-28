@@ -1,0 +1,126 @@
+# A complete simulated laboratory. Nothing here touches real hardware, which is
+# why the autonomy level is set higher than any real bench should run at.
+name: simulated-lab
+description: >
+  Four simulated instruments sharing one bench: a widefield fluorescence
+  microscope, a multi-mode plate reader, an eight-channel liquid handler and a
+  CO2 incubator. Plates dispensed by the handler are the same plates the reader
+  measures and the incubator warms.
+
+data_dir: ./labbench-data
+
+devices:
+  - id: scope1
+    driver: sim_microscope
+    display_name: Widefield Microscope
+    kind: microscope
+    vendor: LabBench Simulation
+    model: WF-1
+    location: bench-north
+    labels: {room: "sim", biosafety: "none"}
+    settings:
+      seed: 7
+      width: 512
+      height: 512
+      objective: "20x"
+      data_dir: ./labbench-data/images
+
+  - id: reader1
+    driver: sim_plate_reader
+    display_name: Multi-Mode Plate Reader
+    kind: plate_reader
+    vendor: LabBench Simulation
+    model: MR-2
+    location: bench-south
+    settings:
+      seed: 11
+      data_dir: ./labbench-data/reads
+
+  - id: handler1
+    driver: sim_liquid_handler
+    display_name: 8-Channel Liquid Handler
+    kind: liquid_handler
+    vendor: LabBench Simulation
+    model: LH-8
+    location: bench-centre
+    settings:
+      seed: 13
+      tip_boxes: 6
+      troughs:
+        water: 1.0e9
+        buffer: 1.0e9
+        fluorescein: 1.0e9
+        resazurin: 1.0e9
+
+  - id: incubator1
+    driver: sim_incubator
+    display_name: CO2 Incubator
+    kind: incubator
+    vendor: LabBench Simulation
+    model: IN-12
+    location: wall-east
+    labels: {biosafety: "BSL1"}
+    settings:
+      slots: 12
+      # Compresses simulated time so a demo does not take twenty minutes.
+      # Every reading still reports the real chamber state.
+      time_scale: 120.0
+
+safety:
+  # BOUNDED: autonomous inside a strictly declared operating domain. The hazard
+  # ceiling that implies is `sample`, so imaging and pipetting run unattended
+  # while anything biological or radiological still needs a signature.
+  autonomy: 3
+
+  # Normally true, and normally the right default: an irreversible action
+  # deserves a human. It is false here only because every device on this bench
+  # is simulated, and demanding a signature for each of the thousands of frames
+  # in a tile scan would make the simulation unusable for the thing it exists
+  # to teach. Do not copy this line into a configuration with real hardware.
+  approve_irreversible: false
+
+  # Anything at or above `sample` must be predicted before it is executed.
+  require_simulation_at_or_above: sample
+  block_on_simulation_violation: true
+
+  rules:
+    - name: reads-are-free
+      min_hazard: none
+      command: "read_*"
+      effect: allow
+      priority: 10
+
+    - name: protect-the-63x-objective
+      device: scope1
+      feature: FocusControl
+      command: move_z
+      effect: allow
+      priority: 20
+      # Tighter than the driver's own 0-300 um envelope. This is the site
+      # saying "on this project, never above 190" - the working distance of the
+      # highest-magnification objective on the turret.
+      limits:
+        z_um:
+          minimum: 0.0
+          maximum: 190.0
+
+    - name: cap-tile-scans
+      device: scope1
+      feature: Camera
+      command: acquire_tile
+      effect: allow
+      priority: 30
+      # A runaway agent tiling all night would bleach every specimen on the
+      # bench and fill the disk.
+      max_per_window: 20
+      window_s: 3600
+
+    - name: incubator-gas-needs-a-human
+      device: incubator1
+      feature: GasControl
+      command: set_co2
+      effect: require_approval
+      reason: >
+        CO2 setpoint changes act directly on live cultures and are not
+        delegated to an agent on this bench.
+      priority: 40

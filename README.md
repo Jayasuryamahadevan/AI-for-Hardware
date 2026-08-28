@@ -36,10 +36,12 @@ updated as each layer lands.
 | `protocol/` | HTTP/1.1 server, SSE, WebSocket (RFC 6455), stdio | ✅ complete |
 | `protocol/client.py` | Client for all three transports, one call surface | ✅ complete |
 | `bridge/` | Tool schemas (6 AI dialects), human-approval broker | ✅ complete |
-| `bridge/toolset.py` | The gateway tool surface | 🔨 building |
+| `bridge/toolset.py` | The gateway tool surface (16 tools, 26 methods) | ✅ complete |
+| `gateway.py` | Assembly: request → ledger → safety → approval → act | ✅ complete |
 | `drivers/simulated/` | Microscope, plate reader, liquid handler, incubator | ✅ complete |
 | `drivers/` | SCPI, WoT, MicroManager, SiLA2, OPC UA LADS, Opentrons | ⬜ |
-| `memory/` | Durable notes and documents an agent can search | ⬜ |
+| `configs/` | A complete four-instrument simulated lab | ✅ complete |
+| `memory/` | Durable notes and documents an agent can search | 🔨 building |
 | `experiment/` | Protocols, runs, replay | ⬜ |
 | `cli.py` | `serve` · `doctor` · `tools` · `ledger` | ⬜ |
 | `tests/` | Test suite | ⬜ |
