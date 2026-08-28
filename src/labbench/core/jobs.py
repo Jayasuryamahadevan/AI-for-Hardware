@@ -273,7 +273,7 @@ class JobManager:
         if task is not None:
             try:
                 await asyncio.wait_for(asyncio.shield(task), timeout)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 pass
         return self.get(job_id)
 

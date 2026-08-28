@@ -27,8 +27,15 @@ from typing import Any
 import numpy as np
 
 from ...core.capability import (
-    Command, Constraint, Event, Feature, Hazard, Parameter, Precondition,
-    Property, Reversibility,
+    Command,
+    Constraint,
+    Event,
+    Feature,
+    Hazard,
+    Parameter,
+    Precondition,
+    Property,
+    Reversibility,
 )
 from ...core.device import Device, DeviceDescriptor, ExecutionContext, SimulationResult
 from ...core.errors import ConstraintViolation, DeviceNotReady

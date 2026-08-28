@@ -30,8 +30,15 @@ from typing import Any
 import numpy as np
 
 from ...core.capability import (
-    Command, Constraint, Event, Feature, Hazard, Parameter, Precondition,
-    Property, Reversibility,
+    Command,
+    Constraint,
+    Event,
+    Feature,
+    Hazard,
+    Parameter,
+    Precondition,
+    Property,
+    Reversibility,
 )
 from ...core.device import Device, DeviceDescriptor, ExecutionContext, SimulationResult
 from ...core.errors import ConstraintViolation, DeviceNotReady
@@ -251,7 +258,7 @@ class SimulatedLiquidHandler(Device):
     async def _estop(self) -> None:
         """Stop the head. Tips stay on, and whatever is in them stays in them:
         blowing it out somewhere unplanned would be worse than holding it."""
-        return None
+        return
 
     async def _read(self, feature: str, name: str) -> Any:
         return {
@@ -603,8 +610,8 @@ class SimulatedLiquidHandler(Device):
                     return SimulationResult(
                         feasible=False, fidelity="kinematic",
                         violations=[
-                            f"needs {needed} tips with new_tips_each, but only "
-                            f"{self.tips_remaining} remain"
+                            (f"needs {needed} tips with new_tips_each, but only "
+                             f"{self.tips_remaining} remain")
                         ],
                     )
             return SimulationResult(

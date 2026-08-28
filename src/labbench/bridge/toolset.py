@@ -22,10 +22,10 @@ import time
 from typing import Any
 
 from ..core.capability import Command, Feature
-from ..core.device import Device, DeviceState
-from ..core.errors import DeviceNotFound, LabBenchError, ValidationError
+from ..core.device import DeviceState
+from ..core.errors import ValidationError
 from ..protocol.router import Router, RpcContext
-from .schema import Dialect, ToolSpec, emit
+from .schema import ToolSpec, emit
 
 
 def register_tools(router: Router, gateway: Any) -> None:
@@ -371,6 +371,176 @@ def register_tools(router: Router, gateway: Any) -> None:
         )
         return {"seq": record.seq, "id": record.id, "timestamp": record.timestamp}
 
+    # -- memory -------------------------------------------------------------
+
+    @router.method("memory.write")
+    async def memory_write(
+        content: str, title: str = "", kind: str = "note", tags: list[str] | None = None,
+        run_id: str | None = None, device: str | None = None, store: str | None = None,
+        ctx: RpcContext = None,
+    ) -> dict[str, Any]:
+        """Write a durable, searchable note or document.
+
+        Unlike `ledger.note` -- a timestamped, immutable entry in the audit
+        trail -- this is meant to be found again next week by `memory.search`.
+        Write what is worth keeping: an SOP, a calibration offset, what a
+        field of the plate looked like and why it was excluded.
+        """
+        from ..memory.store import MemoryRecord
+
+        record = MemoryRecord(
+            content=content, title=title, kind=kind, tags=tags or [], run_id=run_id,
+            device_id=device, actor=ctx.actor if ctx else "agent",
+        )
+        saved = await gateway.memory.store(store).write(record)
+        return saved.model_dump(mode="json")
+
+    @router.method("memory.search")
+    async def memory_search(
+        query: str = "", kind: str | None = None, tags: list[str] | None = None,
+        run_id: str | None = None, device: str | None = None, store: str | None = None,
+        limit: int = 20,
+    ) -> dict[str, Any]:
+        """Find notes and documents relevant to `query`. Omit it to browse by filter alone."""
+        records = await gateway.memory.store(store).search(
+            query, kind=kind, tags=tags, run_id=run_id, device_id=device, limit=limit,
+        )
+        return {"records": [r.summary() for r in records], "count": len(records)}
+
+    @router.method("memory.get")
+    async def memory_get(id: str, store: str | None = None) -> dict[str, Any]:
+        """Read one memory record in full, including its whole content."""
+        record = await gateway.memory.store(store).get(id)
+        return record.model_dump(mode="json")
+
+    @router.method("memory.list")
+    async def memory_list(
+        kind: str | None = None, run_id: str | None = None, store: str | None = None,
+        limit: int = 50,
+    ) -> dict[str, Any]:
+        """Recent memory records, newest first."""
+        records = await gateway.memory.store(store).list(kind=kind, run_id=run_id, limit=limit)
+        return {"records": [r.summary() for r in records], "count": len(records)}
+
+    @router.method("memory.delete")
+    async def memory_delete(
+        id: str, reason: str, store: str | None = None, ctx: RpcContext = None,
+    ) -> dict[str, Any]:
+        """Remove a memory record. Requires a reason, which is written to the ledger."""
+        if not reason.strip():
+            raise ValidationError("deleting a memory record requires a reason")
+        await gateway.memory.store(store).delete(id)
+        gateway.ledger.log(
+            "note", actor=ctx.actor if ctx else "agent", reason=reason,
+            payload={"deleted_memory_id": id},
+        )
+        return {"deleted": True, "id": id}
+
+    # -- experiments ----------------------------------------------------------
+
+    @router.method("experiment.validate")
+    async def experiment_validate(protocol: dict[str, Any]) -> dict[str, Any]:
+        """Check a protocol's steps against the current capability model, without running it.
+
+        Catches an unknown device, a wrong argument name, and any literal
+        value outside its declared envelope, before the first step executes.
+        A `${...}` reference to a later step's result cannot be checked here;
+        see `experiment.dry_run` for what that needs.
+        """
+        from ..experiment import Protocol
+
+        parsed = Protocol.model_validate(protocol)
+        problems = parsed.validate_against(gateway)
+        return {"valid": not problems, "problems": problems, "steps": len(parsed.steps)}
+
+    @router.method("experiment.dry_run")
+    async def experiment_dry_run(protocol: dict[str, Any]) -> dict[str, Any]:
+        """Simulate every step in order, without touching hardware.
+
+        The protocol-level sibling of `device.simulate`: resolves `${...}`
+        references against *simulated* results, so it also catches a
+        downstream step whose predicted state would fail an envelope check.
+        """
+        from ..experiment import Protocol, dry_run_protocol
+
+        return await dry_run_protocol(Protocol.model_validate(protocol), gateway)
+
+    @router.method("experiment.start")
+    async def experiment_start(
+        protocol: dict[str, Any], variables: dict[str, Any] | None = None,
+        ctx: RpcContext = None,
+    ) -> dict[str, Any]:
+        """Begin executing a protocol. Long-running: returns a run handle immediately.
+
+        Every step still crosses the safety kernel exactly as a direct
+        `device.invoke` would. A step whose hazard needs a human signature
+        parks the whole run on status `awaiting_approval` rather than failing
+        it; a human calls `approval.grant`, then `experiment.resume`.
+        """
+        from ..core.errors import ValidationError as _ValidationError
+        from ..experiment import Protocol
+
+        parsed = Protocol.model_validate(protocol)
+        problems = parsed.validate_against(gateway)
+        if problems:
+            raise _ValidationError(
+                f"protocol has {len(problems)} problem(s); call experiment.validate first",
+                problems=problems,
+            )
+        protocol_id = gateway.experiments.define(parsed)
+        run = gateway.experiments.start(
+            parsed, protocol_id=protocol_id, variables=variables or {},
+            actor=ctx.actor if ctx else "agent",
+        )
+        return {"run": run.summary(), "protocol_id": protocol_id}
+
+    @router.method("experiment.status")
+    async def experiment_status(run_id: str, include_steps: bool = True) -> dict[str, Any]:
+        """Progress, per-step results, and any pending approval for one run."""
+        return gateway.experiments.get(run_id).summary(include_steps=include_steps)
+
+    @router.method("experiment.list")
+    async def experiment_list(status: str | None = None, limit: int = 50) -> dict[str, Any]:
+        """Recent runs, newest first."""
+        from ..experiment import RunStatus
+
+        runs = gateway.experiments.list(
+            status=RunStatus(status) if status else None, limit=limit,
+        )
+        return {"runs": [r.summary(include_steps=False) for r in runs], "count": len(runs)}
+
+    @router.method("experiment.cancel")
+    async def experiment_cancel(run_id: str, reason: str = "agent requested") -> dict[str, Any]:
+        """Stop a run. The in-flight step is asked to finish or park; nothing new starts."""
+        run = await gateway.experiments.cancel(run_id, reason=reason)
+        return run.summary()
+
+    @router.method("experiment.resume")
+    async def experiment_resume(run_id: str) -> dict[str, Any]:
+        """Continue a run parked on `awaiting_approval`, after a human has answered.
+
+        Retries the step that asked for a signature with the same approval id,
+        so it succeeds only if that exact call -- the one the human actually
+        saw -- was the one granted.
+        """
+        run = gateway.experiments.get(run_id)
+        protocol = gateway.experiments.get_protocol(run.protocol_id) if run.protocol_id else None
+        if protocol is None:
+            raise ValidationError(f"run {run_id!r} has no stored protocol to resume with")
+        resumed = gateway.experiments.resume(run_id, protocol)
+        return resumed.summary()
+
+    @router.method("experiment.replay")
+    async def experiment_replay(run_id: str) -> dict[str, Any]:
+        """Reconstruct exactly what a finished run did, from the ledger alone.
+
+        Never re-executes anything: see the module docstring in
+        `experiment/replay.py` for why that is the point, not an omission.
+        """
+        from ..experiment import replay_run
+
+        return replay_run(gateway.ledger, run_id).model_dump(mode="json")
+
     # -- self-description -------------------------------------------------
 
     @router.method("tools.schema")
@@ -635,6 +805,72 @@ def tool_specs(gateway: Any) -> list[ToolSpec]:
                 "note": string, "run_id": string, "device": string,
             }, ["note"]),
             hazard="none", tags=["provenance"],
+        ),
+        ToolSpec(
+            name="memory.write",
+            description="Save a durable, searchable note or document - unlike ledger.note, "
+                        "this is meant to be found again later by memory.search. Use it for "
+                        "things worth keeping: an SOP, a calibration offset, a conclusion.",
+            parameters=obj({
+                "content": string, "title": string,
+                "kind": {"type": "string", "description": "Free-form, e.g. 'note', 'sop'."},
+                "tags": {"type": "array", "items": string},
+                "run_id": string, "device": string,
+            }, ["content"]),
+            hazard="none", tags=["memory"],
+        ),
+        ToolSpec(
+            name="memory.search",
+            description="Find notes and documents relevant to a query. Call this before asking "
+                        "an operator something the lab may already have written down.",
+            parameters=obj({
+                "query": string,
+                "kind": string, "tags": {"type": "array", "items": string},
+                "run_id": string, "device": string,
+                "limit": {"type": "integer", "default": 20},
+            }),
+            read_only=True, idempotent=True, hazard="none", tags=["memory"],
+        ),
+        ToolSpec(
+            name="experiment.validate",
+            description="Check a multi-step protocol against the current capability model "
+                        "before running it: unknown devices, wrong argument names, "
+                        "out-of-envelope literal values. Call this before experiment.start.",
+            parameters=obj({
+                "protocol": {"type": "object",
+                             "description": "name, variables, and a list of steps "
+                                            "(device, feature, command, args, reason)."},
+            }, ["protocol"]),
+            read_only=True, idempotent=True, hazard="none", tags=["experiment", "planning"],
+        ),
+        ToolSpec(
+            name="experiment.start",
+            description="Begin executing a validated multi-step protocol. Long-running: "
+                        "returns a run handle immediately. A step whose hazard needs a human "
+                        "signature parks the whole run rather than failing it; check "
+                        "experiment.status and resume it once approved.",
+            parameters=obj({
+                "protocol": {"type": "object"},
+                "variables": {"type": "object",
+                              "description": "Overrides for the protocol's declared variables."},
+            }, ["protocol"]),
+            destructive=True, hazard="varies", tags=["experiment", "action"],
+        ),
+        ToolSpec(
+            name="experiment.status",
+            description="Progress, per-step results, and any pending approval for one run.",
+            parameters=obj({
+                "run_id": string,
+                "include_steps": {"type": "boolean", "default": True},
+            }, ["run_id"]),
+            read_only=True, idempotent=True, hazard="none", tags=["experiment"],
+        ),
+        ToolSpec(
+            name="experiment.replay",
+            description="Reconstruct exactly what a finished run did, in order, from the "
+                        "tamper-evident ledger - what was decided, what ran, who approved what.",
+            parameters=obj({"run_id": string}, ["run_id"]),
+            read_only=True, idempotent=True, hazard="none", tags=["experiment", "provenance"],
         ),
         ToolSpec(
             name="estop",

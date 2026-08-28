@@ -25,7 +25,7 @@ import os
 import sys
 from typing import Any
 
-from .framing import Framing, FrameError, encode, read_frame
+from .framing import FrameError, Framing, encode, read_frame
 from .jsonrpc import INTERNAL_ERROR, JsonRpcError, Response, parse_message, serialise
 from .router import Router, RpcContext
 

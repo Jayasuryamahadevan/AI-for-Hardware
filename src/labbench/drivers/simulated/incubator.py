@@ -21,7 +21,14 @@ from collections.abc import Sequence
 from typing import Any
 
 from ...core.capability import (
-    Command, Constraint, Event, Feature, Hazard, Parameter, Property, Reversibility,
+    Command,
+    Constraint,
+    Event,
+    Feature,
+    Hazard,
+    Parameter,
+    Property,
+    Reversibility,
 )
 from ...core.device import Device, DeviceDescriptor, ExecutionContext, SimulationResult
 from ...core.errors import ConstraintViolation, DeviceNotReady

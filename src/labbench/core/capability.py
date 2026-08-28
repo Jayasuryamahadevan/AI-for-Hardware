@@ -181,9 +181,9 @@ class Parameter(BaseModel):
     required: bool = True
     constraint: Constraint = Field(default_factory=Constraint)
     #: For type="array": the element definition.
-    items: "Parameter | None" = None
+    items: Parameter | None = None
     #: For type="object": named fields.
-    properties: list["Parameter"] = Field(default_factory=list)
+    properties: list[Parameter] = Field(default_factory=list)
 
     def to_json_schema(self) -> dict[str, Any]:
         schema: dict[str, Any] = {"type": self.type}
@@ -296,7 +296,7 @@ class Precondition(BaseModel):
 class Property(BaseModel):
     """Readable (and optionally writable/observable) instrument state."""
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
 
     name: str
     description: str = ""
@@ -307,8 +307,6 @@ class Property(BaseModel):
     write_hazard: Hazard = Hazard.BENIGN
     #: Suggested minimum polling interval when observing, in seconds.
     poll_interval_s: float = 1.0
-
-    model_config = ConfigDict(extra="forbid", populate_by_name=True)
 
 
 class Command(BaseModel):
@@ -418,5 +416,5 @@ class Feature(BaseModel):
     def command(self, name: str) -> Command | None:
         return next((c for c in self.commands if c.name == name), None)
 
-    def property(self, name: str) -> Property | None:  # noqa: A003
+    def property(self, name: str) -> Property | None:
         return next((p for p in self.properties if p.name == name), None)

@@ -17,7 +17,7 @@ from typing import Any
 import yaml
 from pydantic import BaseModel, ConfigDict, Field
 
-from .device import Device, DeviceDescriptor, DeviceEvent, DeviceState
+from .device import Device, DeviceDescriptor, DeviceState
 from .errors import DeviceNotFound, DriverUnavailable
 
 ENTRY_POINT_GROUP = "labbench.drivers"
@@ -55,7 +55,7 @@ class LabConfig(BaseModel):
     data_dir: str = "./labbench-data"
 
     @classmethod
-    def load(cls, path: str | Path) -> "LabConfig":
+    def load(cls, path: str | Path) -> LabConfig:
         text = Path(path).expanduser().read_text(encoding="utf-8")
         return cls.model_validate(yaml.safe_load(text) or {})
 
@@ -74,7 +74,7 @@ class DriverRegistry:
         for ep in md.entry_points(group=ENTRY_POINT_GROUP):
             try:
                 cls = ep.load()
-            except Exception as exc:  # optional dependency missing, usually
+            except Exception as exc:  # noqa: BLE001 - optional dependency missing, usually
                 self._failed[ep.name] = f"{type(exc).__name__}: {exc}"
                 continue
             if not (isinstance(cls, type) and issubclass(cls, Device)):
@@ -212,7 +212,7 @@ class DeviceManager:
             try:
                 await dev.connect()
                 results[dev.id] = dev.state.value
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001 - one bad device must not stop the rest
                 results[dev.id] = f"error: {exc}"
 
         await asyncio.gather(*(one(d) for d in self._devices.values()))
@@ -232,7 +232,7 @@ class DeviceManager:
             try:
                 await dev.estop(reason)
                 results[dev.id] = "stopped"
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001 - a failed e-stop must be reported, never raised
                 results[dev.id] = f"ESTOP FAILED: {exc}"
 
         await asyncio.gather(*(one(d) for d in self._devices.values()))

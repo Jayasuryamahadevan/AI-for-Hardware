@@ -8,8 +8,9 @@ experiment is misbehaving, and it should depend on as little as possible.
     labbench doctor  [--config lab.yaml]
     labbench devices --config lab.yaml
     labbench tools   [--dialect anthropic|openai|gemini|jsonschema|openapi]
-    labbench ledger  verify|query
-    labbench call    --config lab.yaml <method> [key=value ...]
+    labbench ledger     verify|query
+    labbench call       --config lab.yaml <method> [key=value ...]
+    labbench experiment run --config lab.yaml protocol.yaml [var=value ...]
 """
 
 from __future__ import annotations
@@ -62,7 +63,7 @@ def _load_config(path: str | None) -> Any:
         raise SystemExit(f"labbench: no such config file: {config_path}")
     try:
         return LabConfig.load(config_path)
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001 - any failure here becomes a clean operator-facing message
         raise SystemExit(f"labbench: {config_path} is not a valid lab config: {exc}") from None
 
 
@@ -224,7 +225,7 @@ async def _doctor(args: argparse.Namespace) -> int:
             try:
                 registry.get(device.driver)
                 print(f"  [ok]   {device.id:12s} -> {device.driver}")
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001 - one bad driver must not stop the whole report
                 ok = False
                 print(f"  [FAIL] {device.id:12s} -> {device.driver}: {exc}")
 
@@ -355,6 +356,91 @@ async def _call(args: argparse.Namespace) -> int:
         await gateway.close()
 
 
+# -- experiment --------------------------------------------------------------
+
+
+async def _experiment_run(args: argparse.Namespace) -> int:
+    """Run a protocol to completion, prompting the operator for any approval.
+
+    A one-shot command holds its own Gateway for the duration of the run --
+    the same shape `labbench call` uses -- so a step that needs a human
+    signature is answered right here, interactively, rather than requiring a
+    second terminal talking to a long-lived server.
+    """
+    from .experiment import Protocol, RunStatus
+    from .gateway import Gateway
+
+    variables: dict[str, Any] = {}
+    for pair in args.var:
+        if "=" not in pair:
+            raise SystemExit(f"labbench: expected key=value, got {pair!r}")
+        key, _, raw = pair.partition("=")
+        try:
+            variables[key] = json.loads(raw)
+        except json.JSONDecodeError:
+            variables[key] = raw
+
+    try:
+        protocol = Protocol.load(args.protocol)
+    except Exception as exc:  # noqa: BLE001 - any failure here becomes a clean operator-facing message
+        raise SystemExit(f"labbench: {args.protocol} is not a valid protocol: {exc}") from None
+
+    gateway = Gateway(_load_config(args.config), data_dir=args.data_dir)
+    await gateway.start()
+    try:
+        problems = protocol.validate_against(gateway)
+        if problems:
+            print(f"labbench: {protocol.name} has {len(problems)} problem(s):", file=sys.stderr)
+            for problem in problems:
+                print(f"  - {problem}", file=sys.stderr)
+            return 1
+
+        run = gateway.experiments.start(protocol, variables=variables, actor="human:cli")
+        print(f"labbench: running {protocol.name!r} as {run.id}", file=sys.stderr)
+
+        while True:
+            current = gateway.experiments.get(run.id)
+            if current.status.terminal:
+                break
+            if current.status is not RunStatus.AWAITING_APPROVAL:
+                # Every branch of this loop must yield at least once per
+                # iteration: `experiments.resume()` below only *schedules* the
+                # background task that eventually moves the run out of
+                # AWAITING_APPROVAL, and a loop that never awaits would starve
+                # that task forever on this single-threaded event loop rather
+                # than genuinely wait for it.
+                await asyncio.sleep(0.1)
+                continue
+
+            pending_for_run = [p for p in gateway.approvals.pending() if p.run_id == run.id]
+            if not pending_for_run:  # pragma: no cover - resolved by a racing caller
+                await asyncio.sleep(0.1)
+                continue
+            pending = pending_for_run[0]
+            print(f"\n{pending.prompt}\n", file=sys.stderr)
+            # input()'s own prompt argument always writes to stdout, which
+            # would land inside the JSON this command prints there on exit;
+            # the prompt is written to stderr explicitly instead, exactly the
+            # stdout-carries-only-the-result discipline `protocol/stdio.py`
+            # enforces for the same reason.
+            print("Grant this action? [y/N] ", end="", file=sys.stderr)
+            answer = input().strip().lower()
+            if answer == "y":
+                print("Your name or id: ", end="", file=sys.stderr)
+                approver = input().strip() or "human:cli"
+                await gateway.approvals.grant(pending.id, approver=approver)
+            else:
+                await gateway.approvals.deny(pending.id, approver="human:cli", reason="declined at the CLI")
+            gateway.experiments.resume(run.id, protocol)
+            await asyncio.sleep(0.1)  # let the resumed run actually start before re-checking it
+
+        finished = gateway.experiments.get(run.id)
+        _emit(finished.summary())
+        return 0 if finished.status is RunStatus.SUCCEEDED else 1
+    finally:
+        await gateway.close()
+
+
 # -- argument parsing ------------------------------------------------------
 
 
@@ -373,10 +459,17 @@ def build_parser() -> argparse.ArgumentParser:
     # `labbench --data-dir X serve` and `labbench serve --data-dir X` work.
     # Requiring one particular order is the kind of papercut that makes a tool
     # feel hostile at two in the morning.
+    #
+    # The default here MUST be `argparse.SUPPRESS`, not a concrete value: a
+    # subparser applies its own default for every argument it does not see on
+    # the command line, and with a concrete default that unconditionally
+    # overwrites whatever the top-level parser already set from
+    # `labbench --data-dir X <command>` -- silently discarding it, with no
+    # error, the moment the flag is not repeated after the subcommand too.
     common = argparse.ArgumentParser(add_help=False)
-    common.add_argument("-v", "--verbose", action="count", default=0,
+    common.add_argument("-v", "--verbose", action="count", default=argparse.SUPPRESS,
                         help=argparse.SUPPRESS)
-    common.add_argument("--data-dir", default=None, help=argparse.SUPPRESS)
+    common.add_argument("--data-dir", default=argparse.SUPPRESS, help=argparse.SUPPRESS)
 
     sub = parser.add_subparsers(dest="command", required=True)
 
@@ -426,6 +519,14 @@ def build_parser() -> argparse.ArgumentParser:
     call.add_argument("params", nargs="*", help="key=value; values are parsed as JSON.")
     call.add_argument("--actor", default="human:cli")
     call.set_defaults(func=_call)
+
+    experiment = sub.add_parser("experiment", parents=[common], help="Run a protocol.")
+    experiment_sub = experiment.add_subparsers(dest="experiment_command", required=True)
+    run = experiment_sub.add_parser("run", parents=[common], help="Run a protocol to completion.")
+    run.add_argument("-c", "--config", required=True)
+    run.add_argument("protocol", help="Path to a protocol YAML file.")
+    run.add_argument("var", nargs="*", help="key=value overrides for the protocol's variables.")
+    run.set_defaults(func=_experiment_run)
 
     return parser
 

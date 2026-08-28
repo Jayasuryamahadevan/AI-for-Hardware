@@ -23,12 +23,12 @@ import fnmatch
 import time
 from collections import deque
 from enum import Enum, IntEnum
-from typing import Any, Literal
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from .capability import Command, Constraint, Hazard, Reversibility
-from .device import Device, ExecutionContext, SimulationResult
+from .device import Device, SimulationResult
 from .errors import ApprovalRequired, ConstraintViolation, SafetyViolation
 
 
@@ -109,9 +109,7 @@ class PolicyRule(BaseModel):
             return False
         if self.tags and not self.tags.issubset(cmd.tags):
             return False
-        if self.min_hazard is not None and cmd.hazard.rank < self.min_hazard.rank:
-            return False
-        return True
+        return self.min_hazard is None or cmd.hazard.rank >= self.min_hazard.rank
 
 
 class SafetyPolicy(BaseModel):
@@ -214,8 +212,8 @@ class SafetyKernel:
                 if not ok:
                     return (
                         Effect.DENY,
-                        [f"rate limit: rule {label!r} allows "
-                         f"{rule.max_per_window} per {rule.window_s:.0f}s, {seen} used"],
+                        [(f"rate limit: rule {label!r} allows "
+                          f"{rule.max_per_window} per {rule.window_s:.0f}s, {seen} used")],
                         matched, limits,
                     )
             if effect is None or rule.effect is Effect.DENY:

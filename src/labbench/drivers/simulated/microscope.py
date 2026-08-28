@@ -48,9 +48,11 @@ from ...core.device import (
     ExecutionContext,
     SimulationResult,
 )
-from ...core.errors import ConstraintViolation, DeviceNotReady, DeviceFault
+from ...core.errors import ConstraintViolation, DeviceNotReady
+from .. import _png
 from . import _optics
-from ._png import write as write_png
+
+write_png = _png.write
 
 #: Stage travel. Beyond this the carriage hits its hard stop, which on a real
 #: instrument means a crashed objective and a service call.
@@ -406,7 +408,7 @@ class SimulatedMicroscope(Device):
     # -- property access --------------------------------------------------
 
     async def _read(self, feature: str, name: str) -> Any:
-        mag, na, wd = _optics.OBJECTIVES[self.objective]
+        _mag, na, wd = _optics.OBJECTIVES[self.objective]
         table: dict[tuple[str, str], Any] = {
             ("MotionControl", "x_um"): self.x_um,
             ("MotionControl", "y_um"): self.y_um,

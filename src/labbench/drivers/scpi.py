@@ -30,11 +30,21 @@ from collections.abc import Sequence
 from typing import Any
 
 from ..core.capability import (
-    Command, Constraint, Event, Feature, Hazard, Parameter, Property, Reversibility,
+    Command,
+    Constraint,
+    Event,
+    Feature,
+    Hazard,
+    Parameter,
+    Property,
+    Reversibility,
 )
 from ..core.device import Device, DeviceDescriptor, ExecutionContext, SimulationResult
 from ..core.errors import (
-    ConstraintViolation, DeviceFault, DriverUnavailable, TransportError, ValidationError,
+    DeviceFault,
+    DriverUnavailable,
+    TransportError,
+    ValidationError,
 )
 
 log = logging.getLogger("labbench.scpi")
@@ -82,7 +92,7 @@ class ScpiTransport:
             self._reader, self._writer = await asyncio.wait_for(
                 asyncio.open_connection(self.host, self.port), self.timeout_s
             )
-        except (OSError, asyncio.TimeoutError) as exc:
+        except (TimeoutError, OSError) as exc:
             raise TransportError(
                 f"cannot reach the instrument at {self.host}:{self.port}: {exc}",
                 host=self.host, port=self.port,
@@ -112,7 +122,7 @@ class ScpiTransport:
             await self._writer.drain()
             try:
                 raw = await asyncio.wait_for(self._reader.readline(), self.timeout_s)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 # A timed-out query is the dangerous case: the instrument may
                 # still answer later, and that answer would be read as the
                 # reply to the *next* query. The link is closed rather than
@@ -169,7 +179,7 @@ class VisaTransport:
 
         try:
             self._instrument = await asyncio.to_thread(connect)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001 - pyvisa can raise almost anything here
             raise TransportError(
                 f"cannot open VISA resource {self.resource!r}: {exc}",
                 resource=self.resource,
@@ -192,7 +202,7 @@ class VisaTransport:
         async with self._lock:
             try:
                 reply = await asyncio.to_thread(self._instrument.query, command)
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001 - pyvisa can raise almost anything here
                 raise TransportError(
                     f"{command!r} failed on {self.resource}: {exc}",
                     command=command, resource=self.resource,
@@ -671,8 +681,8 @@ class ScpiInstrument(Device):
         accepting a fabricated prediction.
         """
         warnings = [
-            f"the SCPI driver has no model of {self.model or 'this instrument'}; "
-            "the outcome of this command cannot be predicted before it is sent"
+            (f"the SCPI driver has no model of {self.model or 'this instrument'}; "
+             "the outcome of this command cannot be predicted before it is sent")
         ]
         spec = self.profile.get("commands", {}).get(command, {})
         if "energises_circuit" in set(spec.get("tags", [])):

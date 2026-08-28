@@ -1,12 +1,14 @@
-"""LabBench — a Model Context Protocol gateway between AI agents and laboratory hardware.
+"""LabBench — a research-grade gateway connecting any AI agent to laboratory hardware.
 
 The package is layered so that each layer is useful without the one above it:
 
-    core/        capability model, safety kernel, jobs, provenance  (no MCP, no I/O)
+    core/        capability model, safety kernel, jobs, provenance  (no I/O)
     drivers/     one module per southbound protocol
     memory/      durable notes and documents an agent can search
     experiment/  protocols and runs built on top of devices
-    server/      the northbound MCP surface
+    protocol/    JSON-RPC 2.0 over HTTP, WebSocket and stdio -- the wire format
+    bridge/      the northbound tool surface: schemas per AI dialect, approvals
+    gateway.py   assembly: request -> ledger -> safety -> approval -> act
     cli.py       operator entry point
 
 Import cost matters here: `labbench.core` must stay importable on a machine with
@@ -51,7 +53,7 @@ from .core.safety import (
     SafetyPolicy,
 )
 
-__all__ = [
+__all__ = [  # noqa: RUF022 - grouped by topic to mirror the import block above, not sorted
     "__version__",
     # capability
     "Command", "Constraint", "Event", "Feature", "Hazard", "Parameter",

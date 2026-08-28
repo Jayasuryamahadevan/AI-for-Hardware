@@ -212,7 +212,7 @@ def render(
     """
     rng = rng or np.random.default_rng()
     mag, na, _wd = OBJECTIVES[objective]
-    ex_nm, em_nm, bleach_rate, _label = CHANNELS[channel]
+    _ex_nm, em_nm, bleach_rate, _label = CHANNELS[channel]
 
     # Sampling: sensor pitch projected back into specimen space.
     px_um = CAMERA_PIXEL_UM / mag

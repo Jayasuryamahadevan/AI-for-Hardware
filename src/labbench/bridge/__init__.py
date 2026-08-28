@@ -19,4 +19,4 @@ from .schema import (
     sanitise_name,
 )
 
-__all__ = ["Dialect", "DIALECTS", "ToolSpec", "emit", "sanitise_name"]
+__all__ = ["DIALECTS", "Dialect", "ToolSpec", "emit", "sanitise_name"]

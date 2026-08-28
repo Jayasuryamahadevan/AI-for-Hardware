@@ -23,7 +23,7 @@ import shlex
 import struct
 import urllib.parse
 from collections.abc import Awaitable, Callable
-from typing import Any
+from typing import Any, Self
 
 from .framing import Framing, encode, read_frame
 from .jsonrpc import JsonRpcError, Request, serialise
@@ -123,7 +123,7 @@ class WebSocketClient(BaseClient):
         self._pump: asyncio.Task[None] | None = None
         self._write_lock = asyncio.Lock()
 
-    async def connect(self) -> "WebSocketClient":
+    async def connect(self) -> WebSocketClient:
         parts = urllib.parse.urlsplit(self.url)
         host = parts.hostname or "127.0.0.1"
         port = parts.port or 80
@@ -163,10 +163,10 @@ class WebSocketClient(BaseClient):
         self._pump = asyncio.create_task(self._read_loop())
         return self
 
-    async def __aenter__(self) -> "WebSocketClient":
+    async def __aenter__(self) -> Self:
         return await self.connect()
 
-    async def __aexit__(self, *exc: Any) -> None:
+    async def __aexit__(self, *exc: object) -> None:
         await self.close()
 
     @staticmethod
@@ -238,7 +238,7 @@ class WebSocketClient(BaseClient):
         )
         try:
             return await asyncio.wait_for(pending.future, timeout)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             self._pending.pop(rid, None)
             raise ClientError(f"{method} timed out after {timeout}s") from None
 
@@ -347,7 +347,7 @@ class HttpClient(BaseClient):
 
         try:
             return await asyncio.wait_for(once(), timeout)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             self._pending.pop(rid, None)
             raise ClientError(f"{method} timed out after {timeout}s") from None
 
@@ -373,7 +373,7 @@ class StdioClient(BaseClient):
         self.process: asyncio.subprocess.Process | None = None
         self._pump: asyncio.Task[None] | None = None
 
-    async def connect(self) -> "StdioClient":
+    async def connect(self) -> StdioClient:
         self.process = await asyncio.create_subprocess_exec(
             *self.command,
             stdin=asyncio.subprocess.PIPE,
@@ -384,10 +384,10 @@ class StdioClient(BaseClient):
         self._pump = asyncio.create_task(self._read_loop())
         return self
 
-    async def __aenter__(self) -> "StdioClient":
+    async def __aenter__(self) -> Self:
         return await self.connect()
 
-    async def __aexit__(self, *exc: Any) -> None:
+    async def __aexit__(self, *exc: object) -> None:
         await self.close()
 
     async def _read_loop(self) -> None:
@@ -415,7 +415,7 @@ class StdioClient(BaseClient):
         await self.process.stdin.drain()
         try:
             return await asyncio.wait_for(pending.future, timeout)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             self._pending.pop(rid, None)
             raise ClientError(f"{method} timed out after {timeout}s") from None
 
@@ -428,16 +428,16 @@ class StdioClient(BaseClient):
             self._pump.cancel()
         try:
             await asyncio.wait_for(self.process.wait(), timeout=5)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             self.process.kill()
         self.process = None
 
 
 def connect(url: str, **kwargs: Any) -> WebSocketClient | HttpClient | StdioClient:
     """Build the right client for a URL. The call surface is identical."""
-    if url.startswith("ws://") or url.startswith("wss://"):
+    if url.startswith(("ws://", "wss://")):
         return WebSocketClient(url, **kwargs)
-    if url.startswith("http://") or url.startswith("https://"):
+    if url.startswith(("http://", "https://")):
         return HttpClient(url, **kwargs)
     if url.startswith("stdio://"):
         return StdioClient(url[len("stdio://"):], **kwargs)

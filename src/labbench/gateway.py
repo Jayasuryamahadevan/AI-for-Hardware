@@ -20,14 +20,13 @@ import logging
 import time
 import uuid
 from pathlib import Path
-from typing import Any
+from typing import Any, Self
 
 from .bridge.approval import ApprovalBroker, ApprovalState
-from .core.device import Device, DeviceEvent, DeviceState, ExecutionContext
+from .core.device import Device, DeviceEvent, ExecutionContext
 from .core.errors import (
     ApprovalDenied,
     ApprovalRequired,
-    DeviceNotFound,
     LabBenchError,
     SafetyViolation,
 )
@@ -35,6 +34,8 @@ from .core.jobs import Job, JobManager
 from .core.provenance import Ledger
 from .core.registry import DeviceManager, DriverRegistry, LabConfig
 from .core.safety import Decision, Effect, SafetyKernel, SafetyPolicy
+from .experiment import ExperimentManager
+from .memory import MemoryConfig, MemoryManager
 from .protocol.router import Router
 
 log = logging.getLogger("labbench.gateway")
@@ -63,6 +64,11 @@ class Gateway:
             broadcast=self._broadcast,
             on_decision=self._record_approval,
         )
+        self.memory = MemoryManager(
+            [MemoryConfig.model_validate(d) for d in self.config.memory] or None,
+            data_dir=self.data_dir,
+        )
+        self.experiments = ExperimentManager(invoke=self.invoke, ledger=self.ledger)
         self.router = Router()
         self.started = time.time()
         #: Sinks that fan events out to connected transports.
@@ -71,6 +77,7 @@ class Gateway:
 
         self.devices.subscribe_all(self._on_device_event)
         self.jobs.watch(self._on_job_update)
+        self.experiments.watch(self._on_experiment_update)
 
         from .bridge.toolset import register_tools
 
@@ -116,6 +123,12 @@ class Gateway:
                 },
             )
 
+    async def _on_experiment_update(self, run: Any) -> None:
+        # run_start/run_step/run_end already land in the ledger from within
+        # ExperimentManager itself, at the moment they happen rather than the
+        # moment a watcher gets around to them; this is only the live feed.
+        await self._broadcast("experiment.update", run.summary(include_steps=False))
+
     def _record_approval(self, request: Any) -> None:
         self.ledger.log(
             "approval",
@@ -159,17 +172,19 @@ class Gateway:
         if self._closed:
             return
         self._closed = True
+        await self.experiments.shutdown()
         await self.jobs.shutdown()
         await self.devices.disconnect_all()
+        await self.memory.close()
         self.ledger.log("session_end", actor="system",
                         payload={"uptime_s": round(time.time() - self.started, 1)})
         self.ledger.close()
 
-    async def __aenter__(self) -> "Gateway":
+    async def __aenter__(self) -> Self:
         await self.start()
         return self
 
-    async def __aexit__(self, *exc: Any) -> None:
+    async def __aexit__(self, *exc: object) -> None:
         await self.close()
 
     # -- the execution path -----------------------------------------------
@@ -390,6 +405,10 @@ class Gateway:
             "drivers": self.devices.registry.catalog(),
             "jobs_running": len([j for j in self.jobs.list() if not j.status.terminal]),
             "approvals_pending": len(self.approvals.pending()),
+            "memory_stores": self.memory.ids(),
+            "experiments_running": len(
+                [r for r in self.experiments.list() if not r.status.terminal]
+            ),
         }
 
 

@@ -58,7 +58,7 @@ _STATUS_TEXT = {
 class HttpRequest:
     """One parsed request."""
 
-    __slots__ = ("method", "target", "path", "query", "headers", "body", "version", "peer")
+    __slots__ = ("body", "headers", "method", "path", "peer", "query", "target", "version")
 
     def __init__(
         self,
@@ -96,7 +96,7 @@ class HttpRequest:
 class HttpResponse:
     """One response to write back."""
 
-    __slots__ = ("status", "body", "headers", "content_type")
+    __slots__ = ("body", "content_type", "headers", "status")
 
     def __init__(
         self,
@@ -111,15 +111,15 @@ class HttpResponse:
         self.headers = headers or {}
 
     @classmethod
-    def json(cls, payload: Any, status: int = 200) -> "HttpResponse":
+    def json(cls, payload: Any, status: int = 200) -> HttpResponse:
         return cls(status, serialise(payload), "application/json")
 
     @classmethod
-    def text(cls, body: str, status: int = 200) -> "HttpResponse":
+    def text(cls, body: str, status: int = 200) -> HttpResponse:
         return cls(status, body, "text/plain; charset=utf-8")
 
     @classmethod
-    def error(cls, status: int, message: str) -> "HttpResponse":
+    def error(cls, status: int, message: str) -> HttpResponse:
         return cls.json({"error": _STATUS_TEXT.get(status, "Error"), "message": message}, status)
 
     def render(self, *, keep_alive: bool) -> bytes:
@@ -166,7 +166,7 @@ class EventStream:
             return False
         try:
             payload = serialise(data)
-            self.writer.write(f"event: {event}\ndata: {payload}\n\n".encode("utf-8"))
+            self.writer.write(f"event: {event}\ndata: {payload}\n\n".encode())
             await self.writer.drain()
             return True
         except (ConnectionResetError, BrokenPipeError, RuntimeError):
@@ -178,7 +178,7 @@ class EventStream:
         if not self._alive:
             return False
         try:
-            self.writer.write(f": {text}\n\n".encode("utf-8"))
+            self.writer.write(f": {text}\n\n".encode())
             await self.writer.drain()
             return True
         except (ConnectionResetError, BrokenPipeError, RuntimeError):
@@ -300,7 +300,7 @@ class HttpServer:
                     request = await asyncio.wait_for(
                         _read_request(reader, peer), timeout=IDLE_TIMEOUT_S
                     )
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     return  # idle keep-alive expiry; not an error
                 except _BadRequest as exc:
                     writer.write(HttpResponse.error(exc.status, exc.message).render(keep_alive=False))

@@ -63,7 +63,7 @@ class Request:
     collapsed into `id is None`.
     """
 
-    __slots__ = ("method", "params", "id", "is_notification")
+    __slots__ = ("id", "is_notification", "method", "params")
 
     def __init__(
         self,
@@ -90,7 +90,7 @@ class Request:
         return self.params if isinstance(self.params, dict) else {}
 
     @classmethod
-    def from_dict(cls, obj: Any) -> "Request":
+    def from_dict(cls, obj: Any) -> Request:
         if not isinstance(obj, dict):
             raise JsonRpcError(INVALID_REQUEST, "request must be a JSON object")
         if obj.get("jsonrpc") != VERSION:
@@ -128,7 +128,7 @@ class Response:
     progress, telemetry and device events.
     """
 
-    __slots__ = ("id", "result", "error", "method", "kind")
+    __slots__ = ("error", "id", "kind", "method", "result")
 
     def __init__(
         self,
@@ -145,15 +145,15 @@ class Response:
         self.kind = kind
 
     @classmethod
-    def ok(cls, id: str | int | None, result: Any) -> "Response":
+    def ok(cls, id: str | int | None, result: Any) -> Response:
         return cls(id=id, result=result, kind="result")
 
     @classmethod
-    def fail(cls, id: str | int | None, error: JsonRpcError) -> "Response":
+    def fail(cls, id: str | int | None, error: JsonRpcError) -> Response:
         return cls(id=id, error=error, kind="error")
 
     @classmethod
-    def notification(cls, method: str, params: Any = None) -> "Response":
+    def notification(cls, method: str, params: Any = None) -> Response:
         return cls(result=params, method=method, kind="notification")
 
     def to_dict(self) -> dict[str, Any]:

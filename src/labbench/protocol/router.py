@@ -74,7 +74,7 @@ class RpcContext:
     know which transport it is running under.
     """
 
-    __slots__ = ("actor", "session_id", "transport", "peer", "_notify", "buffered", "started")
+    __slots__ = ("_notify", "actor", "buffered", "peer", "session_id", "started", "transport")
 
     def __init__(
         self,
@@ -141,7 +141,7 @@ class Router:
 
         return decorator
 
-    def include(self, other: "Router", *, prefix: str = "") -> None:
+    def include(self, other: Router, *, prefix: str = "") -> None:
         for name, fn in other._methods.items():
             self.add(f"{prefix}{name}", fn, other._descriptions.get(name, ""))
 

@@ -17,7 +17,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from .capability import Command, Event, Feature, Hazard, Property
+from .capability import Command, Feature, Hazard, Property
 from .errors import (
     CapabilityNotFound,
     DeviceNotReady,
@@ -117,7 +117,7 @@ class ExecutionContext(BaseModel):
 
     def with_progress(
         self, fn: Callable[[float, str], Awaitable[None]]
-    ) -> "ExecutionContext":
+    ) -> ExecutionContext:
         object.__setattr__(self, "_progress", fn)
         return self
 
@@ -332,7 +332,7 @@ class Device(abc.ABC):
             for prop in f.properties:
                 try:
                     out[f"{fid}.{prop.name}"] = await self._read(fid, prop.name)
-                except Exception as exc:  # a broken sensor must not blind the rest
+                except Exception as exc:  # noqa: BLE001 - a broken sensor must not blind the rest
                     out[f"{fid}.{prop.name}"] = {"error": str(exc)}
         return out
 
@@ -353,7 +353,7 @@ class Device(abc.ABC):
     ) -> dict[str, Any]:
         """Validated, state-gated, precondition-checked command execution."""
         ctx = ctx or ExecutionContext()
-        f, cmd = self.resolve(feature, command)
+        _, cmd = self.resolve(feature, command)
         clean = cmd.validate_args(args)
         if cmd.hazard is not Hazard.NONE:
             self._require_operational()
@@ -397,8 +397,10 @@ class Device(abc.ABC):
         if not cmd.simulatable:
             return SimulationResult(
                 feasible=True, fidelity="none",
-                warnings=[f"{feature}.{command} has no simulation model; "
-                          "outcome cannot be verified before execution"],
+                warnings=[
+                    (f"{feature}.{command} has no simulation model; "
+                     "outcome cannot be verified before execution")
+                ],
             )
         return await self._simulate(feature, command, clean)
 

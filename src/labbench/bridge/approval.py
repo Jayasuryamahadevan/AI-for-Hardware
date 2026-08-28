@@ -208,7 +208,7 @@ class ApprovalBroker:
         remaining = timeout_s if timeout_s is not None else req.seconds_remaining
         try:
             return await asyncio.wait_for(asyncio.shield(waiter), remaining)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             # Report the window the operator actually had, not the fraction of
             # a second left when this coroutine got around to timing out. The
             # ledger reader a year from now needs the former.
