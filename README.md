@@ -49,7 +49,8 @@ updated as each layer lands.
 | `memory/` | Durable notes and documents an agent can search (SQLite, filesystem) | ✅ complete |
 | `experiment/` | Protocols, runs, replay | ✅ complete |
 | `cli.py` | `serve` · `doctor` · `devices` · `tools` · `ledger` · `call` · `experiment run` | ✅ complete |
-| `tests/` | Test suite (295 tests: unit, real-protocol integration, CLI) | ✅ complete |
+| `tests/` | 325 tests: unit, real-protocol integration, CLI, and a driver×dialect conformance matrix | ✅ complete |
+| `examples/` | A working agent loop per dialect (Claude, GPT, Gemini, zero-SDK generic) | ✅ complete |
 
 ---
 
@@ -109,7 +110,11 @@ any vendor. This is USB HID for lab hardware: the class is the contract.
 The same capability model is projected outward into whatever the model on the
 other end speaks: Anthropic tool definitions, OpenAI function-calling schemas,
 Gemini declarations, or plain JSON Schema over HTTP for a local model and a
-hand-rolled loop. No agent SDK is a dependency.
+hand-rolled loop. No agent SDK is a dependency — see `examples/` for a
+working agent loop against each of the four (Claude, GPT, Gemini, and a
+zero-SDK generic loop for anything else), and `tests/test_conformance.py` for
+the automated proof that every driver's command schemas survive every
+dialect's transformation rules, not just a hand-picked example.
 
 **Four ways to plug in.** The call surface is identical across all of them:
 
@@ -278,6 +283,15 @@ curl -XPOST localhost:8765/rpc \
 curl -N localhost:8765/events    # live device events, job progress, approvals
 ```
 
+Or hand the schemas straight to a real agent loop — `examples/` has a working
+one per dialect, Claude/GPT/Gemini and a zero-dependency generic loop for
+anything else:
+
+```bash
+labbench serve -c configs/simulated-lab.yaml --transport ws &
+python examples/agent_anthropic.py "Home the microscope and take a snapshot."
+```
+
 One call, from discovery to action:
 
 ```bash
@@ -298,8 +312,8 @@ labbench ledger verify
 
 ```bash
 uv sync --extra dev --extra all   # gateway + every optional instrument library + pytest/ruff
-uv run pytest                     # 295 tests: unit, real-protocol integration, CLI
-uv run ruff check src tests
+uv run pytest                     # 325 tests: unit, conformance, real-protocol integration, CLI
+uv run ruff check src tests examples
 ```
 
 Most driver tests run against the real thing rather than a mock: a real
@@ -310,6 +324,18 @@ real threaded HTTP server for WoT. Where a real server is impractical in CI
 pulls in `black`/`jinja2`/`isort` for a one-off check) the test fakes the
 narrowest possible seam — the parsed object graph the vendor client builds —
 and says so in the test module's docstring.
+
+`tests/test_conformance.py` is the harness that backs the "any AI, any
+hardware" claim with something checkable: it connects every driver protocol
+at once (mixing simulated instruments with the same real-or-faithfully-faked
+fixtures the driver tests use), then runs every device's every command
+schema through all six dialects' real transformation code — OpenAI strict
+mode's `additionalProperties`/`required` rewrite, Gemini's keyword allowlist,
+and so on — asserting the result is valid and vendor-conformant. A driver
+whose optional dependency is not installed is skipped there exactly as it is
+at runtime, not failed. `tests/test_examples.py` closes the loop on the other
+side: it runs the SDK-free example agent loop against a real `labbench serve`
+process and checks the instrument actually moved.
 
 ---
 
