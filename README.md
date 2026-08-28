@@ -33,8 +33,9 @@ updated as each layer lands.
 |---|---|---|
 | `core/` | Capability model, safety kernel, jobs, provenance ledger | ✅ complete |
 | `protocol/` | JSON-RPC 2.0, dispatch router | ✅ complete |
-| `protocol/` | HTTP/1.1 server, SSE, WebSocket, stdio transports | 🔨 building |
-| `bridge/` | Tool schemas per AI dialect, approval broker, sessions | ⬜ next |
+| `protocol/` | HTTP/1.1 server, SSE, WebSocket (RFC 6455), stdio | ✅ complete |
+| `protocol/client.py` | Client for all three transports, one call surface | ✅ complete |
+| `bridge/` | Tool schemas per AI dialect, approval broker, sessions | 🔨 building |
 | `drivers/simulated/` | Four instruments on a real physics model | ⬜ |
 | `drivers/` | SCPI, WoT, MicroManager, SiLA2, OPC UA LADS, Opentrons | ⬜ |
 | `memory/` | Durable notes and documents an agent can search | ⬜ |
@@ -79,6 +80,15 @@ The same capability model is projected outward into whatever the model on the
 other end speaks: Anthropic tool definitions, OpenAI function-calling schemas,
 Gemini declarations, or plain JSON Schema over HTTP for a local model and a
 hand-rolled loop. No agent SDK is a dependency.
+
+**Four ways to plug in.** The call surface is identical across all of them:
+
+| Transport | For | Notifications |
+|---|---|---|
+| `stdio://` | A local agent that spawns the gateway | Streamed live |
+| `ws://` | A remote agent wanting duplex over one socket | Streamed live |
+| `http://` | Anything with an HTTP client and a JSON parser | Ride back with the reply |
+| SSE `/events` | Dashboards, watchdogs, `curl -N` | Streamed live, filterable by topic |
 
 **Power negotiation — graduated autonomy.**
 USB devices do not simply draw whatever current they like; they ask, and the
