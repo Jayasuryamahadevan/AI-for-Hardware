@@ -1,29 +1,33 @@
 [project]
 name = "labbench"
 version = "0.1.0"
-description = "LabBench - a research-grade Model Context Protocol gateway between AI agents and laboratory hardware."
+description = "LabBench - a research-grade gateway connecting any AI agent to laboratory hardware."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "Apache-2.0" }
+keywords = ["laboratory", "automation", "ai-agents", "instrument-control", "self-driving-lab"]
+
+# Deliberately tiny. The wire protocol, the HTTP server, the WebSocket framing
+# and the tool-schema emitters are all written from scratch in this package, so
+# the gateway has no web-framework or agent-SDK dependency to age out from under
+# it. numpy is here because the simulated instruments model real physics.
 dependencies = [
-    "mcp[cli]>=2.1.1",
     "pydantic>=2.9",
-    "anyio>=4.4",
-    "httpx>=0.27",
     "pyyaml>=6.0",
     "numpy>=1.26",
 ]
 
 [project.optional-dependencies]
 micromanager = ["pymmcore-plus>=0.13", "useq-schema>=0.5"]
-scpi = ["pyvisa>=1.14", "pyvisa-py>=0.7"]
-sila2 = ["sila2>=0.10"]
-opcua = ["asyncua>=1.1"]
-epics = ["ophyd-async>=0.5", "bluesky>=1.13"]
-discovery = ["zeroconf>=0.132"]
-vector = ["numpy>=1.26"]
-imaging = ["tifffile>=2024.1", "imageio>=2.34"]
-all = ["labbench[micromanager,scpi,sila2,opcua,epics,discovery,imaging]"]
+scpi         = ["pyvisa>=1.14", "pyvisa-py>=0.7"]
+sila2        = ["sila2>=0.10"]
+opcua        = ["asyncua>=1.1"]
+epics        = ["ophyd-async>=0.5", "bluesky>=1.13"]
+discovery    = ["zeroconf>=0.132"]
+http         = ["httpx>=0.27"]
+imaging      = ["tifffile>=2024.1", "imageio>=2.34"]
+dev          = ["pytest>=8.0", "pytest-asyncio>=0.24", "ruff>=0.6"]
+all          = ["labbench[micromanager,scpi,sila2,opcua,discovery,http,imaging]"]
 
 [project.scripts]
 labbench = "labbench.cli:main"
@@ -43,7 +47,6 @@ opentrons          = "labbench.drivers.opentrons:OpentronsRobot"
 [project.entry-points."labbench.memory"]
 sqlite     = "labbench.memory.sqlite_store:SqliteMemory"
 filesystem = "labbench.memory.filesystem:FilesystemDocs"
-mcp        = "labbench.memory.mcp_proxy:McpMemoryProxy"
 
 [build-system]
 requires = ["hatchling"]
@@ -51,3 +54,11 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/labbench"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
