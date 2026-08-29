@@ -399,39 +399,43 @@ class SimulatedIncubator(Device):
         self, ctx: ExecutionContext, barcode: str, slot: int | None = None
     ) -> dict[str, Any]:
         try:
-            plate = _labware.BENCH.get(barcode)
+            _labware.BENCH.get(barcode)  # fail fast on an unknown barcode before taking the lock
         except KeyError as exc:
             raise ConstraintViolation(str(exc), barcode=barcode) from None
-        if plate.location not in ("bench", self.id):
-            raise ConstraintViolation(
-                f"plate {barcode!r} is at {plate.location!r}, not on the bench",
-                barcode=barcode, location=plate.location,
-            )
-        if barcode in self.stored.values():
-            raise ConstraintViolation(f"plate {barcode!r} is already stored", barcode=barcode)
-        if slot is None:
-            free = [s for s in range(1, self.slots + 1) if s not in self.stored]
-            if not free:
-                raise DeviceNotReady(
-                    f"every one of the {self.slots} slots is occupied",
-                    device=self.id, capacity=self.slots,
+        # Held across the door-open/settle awaits below: two instruments
+        # racing to claim the same plate must not both pass the `location`
+        # check before either has actually claimed it.
+        async with _labware.BENCH.hold(barcode) as plate:
+            if plate.location not in ("bench", self.id):
+                raise ConstraintViolation(
+                    f"plate {barcode!r} is at {plate.location!r}, not on the bench",
+                    barcode=barcode, location=plate.location,
                 )
-            slot = free[0]
-        if slot in self.stored:
-            raise ConstraintViolation(
-                f"slot {slot} already holds {self.stored[slot]!r}",
-                slot=slot, occupant=self.stored[slot],
-            )
-        if not 1 <= slot <= self.slots:
-            raise ConstraintViolation(
-                f"slot {slot} does not exist; this incubator has slots 1-{self.slots}",
-                slot=slot, capacity=self.slots,
-            )
-        if not self.door_open:
-            await self._cmd_open_door(ctx)
-        await asyncio.sleep(0.2)
-        self.stored[slot] = barcode
-        plate.location = self.id
+            if barcode in self.stored.values():
+                raise ConstraintViolation(f"plate {barcode!r} is already stored", barcode=barcode)
+            if slot is None:
+                free = [s for s in range(1, self.slots + 1) if s not in self.stored]
+                if not free:
+                    raise DeviceNotReady(
+                        f"every one of the {self.slots} slots is occupied",
+                        device=self.id, capacity=self.slots,
+                    )
+                slot = free[0]
+            if slot in self.stored:
+                raise ConstraintViolation(
+                    f"slot {slot} already holds {self.stored[slot]!r}",
+                    slot=slot, occupant=self.stored[slot],
+                )
+            if not 1 <= slot <= self.slots:
+                raise ConstraintViolation(
+                    f"slot {slot} does not exist; this incubator has slots 1-{self.slots}",
+                    slot=slot, capacity=self.slots,
+                )
+            if not self.door_open:
+                await self._cmd_open_door(ctx)
+            await asyncio.sleep(0.2)
+            self.stored[slot] = barcode
+            plate.location = self.id
         await self._cmd_close_door(ctx)
         return {"stored": barcode, "slot": slot, "occupied_slots": len(self.stored),
                 "temperature_c": round(self.temperature_c, 3)}
@@ -447,14 +451,16 @@ class SimulatedIncubator(Device):
         if not self.door_open:
             await self._cmd_open_door(ctx)
         await asyncio.sleep(0.2)
-        del self.stored[slot]
-        plate = _labware.BENCH.get(barcode)
-        plate.location = "bench"
+        async with _labware.BENCH.hold(barcode) as plate:
+            del self.stored[slot]
+            plate.location = "bench"
+            incubated_for_s = round(plate.age_s(), 1)
+            summary = plate.summary()
         await self._cmd_close_door(ctx)
         return {
             "retrieved": barcode, "slot": slot,
-            "incubated_for_s": round(plate.age_s(), 1),
-            "plate": plate.summary(),
+            "incubated_for_s": incubated_for_s,
+            "plate": summary,
         }
 
     # -- prediction -------------------------------------------------------

@@ -387,22 +387,23 @@ class SimulatedLiquidHandler(Device):
                 "aspirate needs either a trough, or both a plate and a well",
                 given={"plate": plate, "well": well, "trough": trough},
             )
-        target = self._plate(plate)
-        try:
-            source = target.well(well)
-        except ValueError as exc:
-            raise ConstraintViolation(str(exc), well=well) from None
-        available = source.volume_ul - target.dead_volume_ul
-        if volume_ul > available:
-            raise ConstraintViolation(
-                f"{well} holds {source.volume_ul:.2f} uL, of which {target.dead_volume_ul:.1f} uL "
-                f"is dead volume the pipette cannot reach; at most {max(0.0, available):.2f} uL "
-                f"is available and {volume_ul:.2f} uL was requested",
-                well=well, volume_ul=source.volume_ul,
-                dead_volume_ul=target.dead_volume_ul, available_ul=max(0.0, available),
-            )
-        drawn = self._delivered(volume_ul)
-        moved = source.remove(drawn)
+        self._plate(plate)  # translates an unknown barcode before taking the lock
+        async with _labware.BENCH.hold(plate) as target:
+            try:
+                source = target.well(well)
+            except ValueError as exc:
+                raise ConstraintViolation(str(exc), well=well) from None
+            available = source.volume_ul - target.dead_volume_ul
+            if volume_ul > available:
+                raise ConstraintViolation(
+                    f"{well} holds {source.volume_ul:.2f} uL, of which {target.dead_volume_ul:.1f} uL "
+                    f"is dead volume the pipette cannot reach; at most {max(0.0, available):.2f} uL "
+                    f"is available and {volume_ul:.2f} uL was requested",
+                    well=well, volume_ul=source.volume_ul,
+                    dead_volume_ul=target.dead_volume_ul, available_ul=max(0.0, available),
+                )
+            drawn = self._delivered(volume_ul)
+            moved = source.remove(drawn)
         self.tip_volume_ul = drawn
         self.tip_contents = await self._absorb_residue(moved, f"{plate}:{well}")
         await asyncio.sleep(0.12)
@@ -416,62 +417,65 @@ class SimulatedLiquidHandler(Device):
     async def _cmd_dispense(
         self, ctx: ExecutionContext, volume_ul: float, plate: str, well: str
     ) -> dict[str, Any]:
-        target = self._plate(plate)
-        try:
-            destination = target.well(well)
-        except ValueError as exc:
-            raise ConstraintViolation(str(exc), well=well) from None
-        # A pipette delivers what it actually drew. Aspirating a nominal 50 uL
-        # leaves something like 49.8 uL in the tip, and refusing the matching
-        # 50 uL dispense over that would model nothing real - it would just
-        # make every aspirate/dispense pair fail. So a shortfall inside the
-        # pipette's own tolerance delivers what is held and reports it; a
-        # genuine over-request still fails, because that is a planning error.
-        tolerance = max(0.5, volume_ul * 0.03)
-        if volume_ul > self.tip_volume_ul + tolerance:
-            raise ConstraintViolation(
-                f"the tips hold {self.tip_volume_ul:.2f} uL but {volume_ul:.2f} uL was "
-                f"requested, which is beyond the {tolerance:.2f} uL delivery tolerance",
-                held_ul=self.tip_volume_ul, requested_ul=volume_ul,
-                tolerance_ul=round(tolerance, 3),
-            )
-        requested_ul = volume_ul
-        volume_ul = min(volume_ul, self.tip_volume_ul)
-        if destination.volume_ul + volume_ul > target.working_volume_ul:
-            await self.emit(
-                "Pipette", "overflow",
-                {"well": well, "current_ul": destination.volume_ul,
-                 "requested_ul": volume_ul, "capacity_ul": target.working_volume_ul},
-                severity="error",
-            )
-            raise ConstraintViolation(
-                f"{well} holds {destination.volume_ul:.2f} uL and the working volume of a "
-                f"{target.format}-well plate is {target.working_volume_ul:.0f} uL; adding "
-                f"{volume_ul:.2f} uL would overflow it onto the plate seal",
-                well=well, current_ul=destination.volume_ul,
-                capacity_ul=target.working_volume_ul, requested_ul=volume_ul,
-            )
-        fraction = volume_ul / self.tip_volume_ul if self.tip_volume_ul > 0 else 0.0
-        moved = {r: pmol * fraction for r, pmol in self.tip_contents.items()}
-        destination.add(volume_ul, moved)
-        for reagent in list(self.tip_contents):
-            self.tip_contents[reagent] -= moved[reagent]
-            if self.tip_contents[reagent] <= 1e-12:
-                del self.tip_contents[reagent]
-        self.tip_volume_ul -= volume_ul
-        self.volume_dispensed_ul += volume_ul
-        # Residue: about 1% of what was carried stays on the tip walls.
-        if self.tip_volume_ul <= 1e-9:
-            self.tip_residue = {r: pmol * 0.01 for r, pmol in moved.items() if pmol > 0}
-            self.tip_contents = {}
-            self.tip_volume_ul = 0.0
-        target.last_touched = asyncio.get_running_loop().time()
+        self._plate(plate)  # translates an unknown barcode before taking the lock
+        async with _labware.BENCH.hold(plate) as target:
+            try:
+                destination = target.well(well)
+            except ValueError as exc:
+                raise ConstraintViolation(str(exc), well=well) from None
+            # A pipette delivers what it actually drew. Aspirating a nominal 50 uL
+            # leaves something like 49.8 uL in the tip, and refusing the matching
+            # 50 uL dispense over that would model nothing real - it would just
+            # make every aspirate/dispense pair fail. So a shortfall inside the
+            # pipette's own tolerance delivers what is held and reports it; a
+            # genuine over-request still fails, because that is a planning error.
+            tolerance = max(0.5, volume_ul * 0.03)
+            if volume_ul > self.tip_volume_ul + tolerance:
+                raise ConstraintViolation(
+                    f"the tips hold {self.tip_volume_ul:.2f} uL but {volume_ul:.2f} uL was "
+                    f"requested, which is beyond the {tolerance:.2f} uL delivery tolerance",
+                    held_ul=self.tip_volume_ul, requested_ul=volume_ul,
+                    tolerance_ul=round(tolerance, 3),
+                )
+            requested_ul = volume_ul
+            volume_ul = min(volume_ul, self.tip_volume_ul)
+            if destination.volume_ul + volume_ul > target.working_volume_ul:
+                await self.emit(
+                    "Pipette", "overflow",
+                    {"well": well, "current_ul": destination.volume_ul,
+                     "requested_ul": volume_ul, "capacity_ul": target.working_volume_ul},
+                    severity="error",
+                )
+                raise ConstraintViolation(
+                    f"{well} holds {destination.volume_ul:.2f} uL and the working volume of a "
+                    f"{target.format}-well plate is {target.working_volume_ul:.0f} uL; adding "
+                    f"{volume_ul:.2f} uL would overflow it onto the plate seal",
+                    well=well, current_ul=destination.volume_ul,
+                    capacity_ul=target.working_volume_ul, requested_ul=volume_ul,
+                )
+            fraction = volume_ul / self.tip_volume_ul if self.tip_volume_ul > 0 else 0.0
+            moved = {r: pmol * fraction for r, pmol in self.tip_contents.items()}
+            destination.add(volume_ul, moved)
+            for reagent in list(self.tip_contents):
+                self.tip_contents[reagent] -= moved[reagent]
+                if self.tip_contents[reagent] <= 1e-12:
+                    del self.tip_contents[reagent]
+            self.tip_volume_ul -= volume_ul
+            self.volume_dispensed_ul += volume_ul
+            # Residue: about 1% of what was carried stays on the tip walls.
+            if self.tip_volume_ul <= 1e-9:
+                self.tip_residue = {r: pmol * 0.01 for r, pmol in moved.items() if pmol > 0}
+                self.tip_contents = {}
+                self.tip_volume_ul = 0.0
+            target.last_touched = asyncio.get_running_loop().time()
+            destination_name = f"{plate}:{target.normalise(well)}"
+            well_volume_ul = destination.volume_ul
         await asyncio.sleep(0.12)
         return {
             "delivered_ul": round(volume_ul, 3),
             "requested_ul": round(requested_ul, 3),
-            "destination": f"{plate}:{target.normalise(well)}",
-            "well_volume_ul": round(destination.volume_ul, 3),
+            "destination": destination_name,
+            "well_volume_ul": round(well_volume_ul, 3),
             "tip_volume_ul": round(self.tip_volume_ul, 3),
         }
 
@@ -520,29 +524,37 @@ class SimulatedLiquidHandler(Device):
     async def _cmd_mix(
         self, ctx: ExecutionContext, plate: str, well: str, volume_ul: float, cycles: int = 3
     ) -> dict[str, Any]:
-        target = self._plate(plate)
-        try:
-            destination = target.well(well)
-        except ValueError as exc:
-            raise ConstraintViolation(str(exc), well=well) from None
-        usable = destination.volume_ul - target.dead_volume_ul
-        if volume_ul > usable:
-            raise ConstraintViolation(
-                f"cannot mix {volume_ul:.1f} uL in {well}: only {max(0.0, usable):.2f} uL is "
-                "reachable above the dead volume",
-                well=well, available_ul=max(0.0, usable),
-            )
-        for cycle in range(cycles):
-            ctx.raise_if_cancelled()
-            await ctx.progress((cycle + 1) / cycles, f"mix cycle {cycle + 1}/{cycles}")
-            await asyncio.sleep(0.04)
-        # Mixing homogenises, which the well model already assumes; what it
-        # really does here is leave residue on the tips.
-        self.tip_residue = {
-            r: pmol * 0.01 for r, pmol in destination.contents.items() if pmol > 0
-        }
-        return {"well": target.normalise(well), "cycles": cycles,
-                "volume_ul": volume_ul, "well_volume_ul": round(destination.volume_ul, 3)}
+        self._plate(plate)  # translates an unknown barcode before taking the lock
+        # Held across the whole mix, not just the initial check: the residue
+        # calculated at the end reads `destination.contents` again after
+        # several `await` points, and that read must describe the same well
+        # this command has been mixing, not one another device touched
+        # mid-cycle.
+        async with _labware.BENCH.hold(plate) as target:
+            try:
+                destination = target.well(well)
+            except ValueError as exc:
+                raise ConstraintViolation(str(exc), well=well) from None
+            usable = destination.volume_ul - target.dead_volume_ul
+            if volume_ul > usable:
+                raise ConstraintViolation(
+                    f"cannot mix {volume_ul:.1f} uL in {well}: only {max(0.0, usable):.2f} uL is "
+                    "reachable above the dead volume",
+                    well=well, available_ul=max(0.0, usable),
+                )
+            for cycle in range(cycles):
+                ctx.raise_if_cancelled()
+                await ctx.progress((cycle + 1) / cycles, f"mix cycle {cycle + 1}/{cycles}")
+                await asyncio.sleep(0.04)
+            # Mixing homogenises, which the well model already assumes; what it
+            # really does here is leave residue on the tips.
+            self.tip_residue = {
+                r: pmol * 0.01 for r, pmol in destination.contents.items() if pmol > 0
+            }
+            well_name = target.normalise(well)
+            well_volume_ul = destination.volume_ul
+        return {"well": well_name, "cycles": cycles,
+                "volume_ul": volume_ul, "well_volume_ul": round(well_volume_ul, 3)}
 
     # -- labware ----------------------------------------------------------
 

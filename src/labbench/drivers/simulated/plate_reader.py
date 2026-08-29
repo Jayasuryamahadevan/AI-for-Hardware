@@ -279,17 +279,23 @@ class SimulatedPlateReader(Device):
                 device=self.id, loaded=self.loaded_barcode,
             )
         try:
-            plate = _labware.BENCH.get(barcode)
+            # `hold` below acquires the lock before checking `location`, which
+            # is the point: two instruments racing to claim the same plate
+            # must not both pass this check before either has actually
+            # claimed it. Existence is checked first so an unknown barcode
+            # fails fast rather than blocking on a lock for nothing.
+            _labware.BENCH.get(barcode)
         except KeyError as exc:
             raise ConstraintViolation(str(exc), barcode=barcode) from None
-        if plate.location not in ("bench", self.id):
-            raise ConstraintViolation(
-                f"plate {barcode!r} is not on the bench; it is at {plate.location!r}. "
-                "Something else has it.",
-                barcode=barcode, location=plate.location,
-            )
-        await asyncio.sleep(0.5)
-        plate.location = self.id
+        async with _labware.BENCH.hold(barcode) as plate:
+            if plate.location not in ("bench", self.id):
+                raise ConstraintViolation(
+                    f"plate {barcode!r} is not on the bench; it is at {plate.location!r}. "
+                    "Something else has it.",
+                    barcode=barcode, location=plate.location,
+                )
+            await asyncio.sleep(0.5)
+            plate.location = self.id
         self.loaded_barcode = barcode
         self.drawer_open = False
         return {"loaded_barcode": barcode, "plate": plate.summary()}
@@ -297,19 +303,20 @@ class SimulatedPlateReader(Device):
     async def _cmd_eject_plate(self, ctx: ExecutionContext) -> dict[str, Any]:
         if self.loaded_barcode is None:
             raise DeviceNotReady("no plate is loaded", device=self.id)
-        plate = _labware.BENCH.get(self.loaded_barcode)
-        plate.location = "bench"
-        barcode, self.loaded_barcode = self.loaded_barcode, None
-        self.drawer_open = True
-        await asyncio.sleep(0.5)
+        barcode = self.loaded_barcode
+        async with _labware.BENCH.hold(barcode) as plate:
+            plate.location = "bench"
+            self.loaded_barcode = None
+            self.drawer_open = True
+            await asyncio.sleep(0.5)
         return {"ejected": barcode}
 
     # -- reading ----------------------------------------------------------
 
-    def _plate(self) -> _labware.Plate:
+    def _require_loaded(self) -> str:
         if self.loaded_barcode is None:
             raise DeviceNotReady("no plate is loaded", device=self.id)
-        return _labware.BENCH.get(self.loaded_barcode)
+        return self.loaded_barcode
 
     def _select(self, plate: _labware.Plate, wells: list[str] | None) -> list[str]:
         if not wells:
@@ -330,18 +337,19 @@ class SimulatedPlateReader(Device):
     async def _cmd_read_absorbance(
         self, ctx: ExecutionContext, wavelength_nm: float = 600.0, wells: list[str] | None = None
     ) -> dict[str, Any]:
-        plate = self._plate()
-        names = self._select(plate, wells)
-        rows = []
-        for index, name in enumerate(names):
-            ctx.raise_if_cancelled()
-            well = plate.wells[name]
-            od = self._absorbance(well, plate, wavelength_nm)
-            rows.append({"well": name, "wavelength_nm": wavelength_nm, "od": round(od, 5),
-                         "volume_ul": round(well.volume_ul, 2)})
-            if index % 24 == 0:
-                await ctx.progress((index + 1) / len(names), f"well {name}")
-        await asyncio.sleep(min(0.3, len(names) * 0.002))
+        barcode = self._require_loaded()
+        async with _labware.BENCH.hold(barcode) as plate:
+            names = self._select(plate, wells)
+            rows = []
+            for index, name in enumerate(names):
+                ctx.raise_if_cancelled()
+                well = plate.wells[name]
+                od = self._absorbance(well, plate, wavelength_nm)
+                rows.append({"well": name, "wavelength_nm": wavelength_nm, "od": round(od, 5),
+                             "volume_ul": round(well.volume_ul, 2)})
+                if index % 24 == 0:
+                    await ctx.progress((index + 1) / len(names), f"well {name}")
+            await asyncio.sleep(min(0.3, len(names) * 0.002))
         self.reads_performed += 1
         artifact = self._write_table(rows, "absorbance", {"wavelength_nm": wavelength_nm})
         values = [r["od"] for r in rows]
@@ -380,19 +388,20 @@ class SimulatedPlateReader(Device):
         gain: float = 60.0,
         wells: list[str] | None = None,
     ) -> dict[str, Any]:
-        plate = self._plate()
-        names = self._select(plate, wells)
-        rows, saturated = [], 0
-        for index, name in enumerate(names):
-            ctx.raise_if_cancelled()
-            rfu = self._fluorescence(plate.wells[name], excitation_nm, emission_nm, gain)
-            if rfu >= 65535:
-                saturated += 1
-            rows.append({"well": name, "rfu": round(rfu, 1),
-                         "volume_ul": round(plate.wells[name].volume_ul, 2)})
-            if index % 24 == 0:
-                await ctx.progress((index + 1) / len(names), f"well {name}")
-        await asyncio.sleep(min(0.3, len(names) * 0.002))
+        barcode = self._require_loaded()
+        async with _labware.BENCH.hold(barcode) as plate:
+            names = self._select(plate, wells)
+            rows, saturated = [], 0
+            for index, name in enumerate(names):
+                ctx.raise_if_cancelled()
+                rfu = self._fluorescence(plate.wells[name], excitation_nm, emission_nm, gain)
+                if rfu >= 65535:
+                    saturated += 1
+                rows.append({"well": name, "rfu": round(rfu, 1),
+                             "volume_ul": round(plate.wells[name].volume_ul, 2)})
+                if index % 24 == 0:
+                    await ctx.progress((index + 1) / len(names), f"well {name}")
+            await asyncio.sleep(min(0.3, len(names) * 0.002))
         self.reads_performed += 1
         if saturated:
             await self.emit("Reader", "saturation",
@@ -436,31 +445,36 @@ class SimulatedPlateReader(Device):
         interval_s: float = 30.0,
         wells: list[str] | None = None,
     ) -> dict[str, Any]:
-        plate = self._plate()
-        names = self._select(plate, wells)
+        barcode = self._require_loaded()
         started = time.time()
         rows: list[dict[str, Any]] = []
-        for cycle in range(cycles):
-            ctx.raise_if_cancelled()
-            # The plate ages between cycles, which is the whole reason a
-            # kinetic read is hazard SAMPLE rather than a free observation.
-            if cycle:
-                plate.apply_evaporation(interval_s, self.temperature_c)
-            elapsed = round(time.time() - started, 2)
-            for name in names:
-                well = plate.wells[name]
-                value = (
-                    self._fluorescence(well, 485.0, 520.0, 60.0)
-                    if mode == "fluorescence"
-                    else self._absorbance(well, plate, 600.0)
-                )
-                rows.append({"cycle": cycle + 1, "elapsed_s": elapsed, "well": name,
-                             "value": round(value, 4)})
-            await ctx.progress((cycle + 1) / cycles, f"cycle {cycle + 1}/{cycles}")
-            if cycle < cycles - 1:
-                # Compressed: a real interval would make a demo unusable, and
-                # the shape of the curve is what matters.
-                await asyncio.sleep(min(interval_s, 0.15))
+        # Held for the whole multi-cycle read, not per cycle: this command can
+        # run for minutes of wall-clock time across many `await` points, and
+        # a plate that changed hands or composition mid-read would make every
+        # cycle after that point describe a plate that no longer exists.
+        async with _labware.BENCH.hold(barcode) as plate:
+            names = self._select(plate, wells)
+            for cycle in range(cycles):
+                ctx.raise_if_cancelled()
+                # The plate ages between cycles, which is the whole reason a
+                # kinetic read is hazard SAMPLE rather than a free observation.
+                if cycle:
+                    plate.apply_evaporation(interval_s, self.temperature_c)
+                elapsed = round(time.time() - started, 2)
+                for name in names:
+                    well = plate.wells[name]
+                    value = (
+                        self._fluorescence(well, 485.0, 520.0, 60.0)
+                        if mode == "fluorescence"
+                        else self._absorbance(well, plate, 600.0)
+                    )
+                    rows.append({"cycle": cycle + 1, "elapsed_s": elapsed, "well": name,
+                                 "value": round(value, 4)})
+                await ctx.progress((cycle + 1) / cycles, f"cycle {cycle + 1}/{cycles}")
+                if cycle < cycles - 1:
+                    # Compressed: a real interval would make a demo unusable, and
+                    # the shape of the curve is what matters.
+                    await asyncio.sleep(min(interval_s, 0.15))
         self.reads_performed += cycles
         artifact = self._write_table(
             rows, f"kinetic_{mode}", {"cycles": cycles, "interval_s": interval_s}
@@ -487,7 +501,7 @@ class SimulatedPlateReader(Device):
     async def _cmd_shake(
         self, ctx: ExecutionContext, duration_s: float = 10.0, amplitude_mm: float = 2.0
     ) -> dict[str, Any]:
-        plate = self._plate()
+        barcode = self._require_loaded()
         self.shaking = True
         try:
             steps = max(1, int(min(duration_s, 8)))
@@ -499,10 +513,11 @@ class SimulatedPlateReader(Device):
             self.shaking = False
         # Splash risk rises with amplitude and fill. This is why shaking is
         # tagged cross_contamination_risk rather than treated as free.
-        overfull = [
-            name for name, w in plate.occupied().items()
-            if w.volume_ul > plate.working_volume_ul * 0.85
-        ]
+        async with _labware.BENCH.hold(barcode) as plate:
+            overfull = [
+                name for name, w in plate.occupied().items()
+                if w.volume_ul > plate.working_volume_ul * 0.85
+            ]
         splashed = bool(overfull) and amplitude_mm > 3.0
         if splashed:
             await self.emit(

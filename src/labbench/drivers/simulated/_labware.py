@@ -16,12 +16,22 @@ mixing dilutes correctly by mass balance, evaporation is a function of
 temperature and time, and a fluorophore's signal is proportional to the amount
 actually present. That is enough to make a serial dilution either right or
 visibly wrong.
+
+`PlateStore.hold()` is the other half of "the same plate": three separate
+`Device` objects sharing one physical plate means three separate event-loop
+tasks can be mid-command against it at once, since each `Device` only
+serialises its own commands (`Device._lock`), never another device's. Every
+driver command that touches a plate holds it for exactly as long as that
+command runs.
 """
 
 from __future__ import annotations
 
+import asyncio
+import contextlib
 import math
 import time
+from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -229,6 +239,30 @@ class PlateStore:
 
     def __init__(self) -> None:
         self._plates: dict[str, Plate] = {}
+        #: One lock per barcode, created on first use. Two different
+        #: *devices* touching the same physical plate concurrently -- a
+        #: kinetic read cycling for minutes while a liquid handler dispenses
+        #: into the same plate, or two instruments each checking a plate's
+        #: `location` is free before either has actually claimed it -- is a
+        #: real race the moment either side's operation spans an `await`
+        #: while holding a reference to the plate, not a hypothetical one.
+        #: See `hold()`.
+        self._locks: dict[str, asyncio.Lock] = {}
+
+    def _lock(self, barcode: str) -> asyncio.Lock:
+        return self._locks.setdefault(barcode, asyncio.Lock())
+
+    @contextlib.asynccontextmanager
+    async def hold(self, barcode: str) -> AsyncIterator[Plate]:
+        """Exclusive access to one physical plate for the duration of an
+        operation that reads, mutates, or transfers custody of it.
+
+        Serialises access to *this* barcode only -- a liquid handler filling
+        plate A and a reader measuring plate B never wait on each other,
+        because they are not touching the same physical object.
+        """
+        async with self._lock(barcode):
+            yield self.get(barcode)
 
     def create(
         self, barcode: str, *, plate_format: str = "96", label: str = "", lidded: bool = True
