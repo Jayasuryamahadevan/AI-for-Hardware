@@ -41,7 +41,7 @@ updated as each layer lands.
 | `protocol/` | HTTP/1.1 server, SSE, WebSocket (RFC 6455), stdio | ✅ complete |
 | `protocol/client.py` | Client for all three transports, one call surface | ✅ complete |
 | `bridge/` | Tool schemas (6 AI dialects), human-approval broker | ✅ complete |
-| `bridge/toolset.py` | The gateway tool surface (28 tools, 46 methods) | ✅ complete |
+| `bridge/toolset.py` | The gateway tool surface (29 tools, 47 methods) | ✅ complete |
 | `gateway.py` | Assembly: request → ledger → safety → approval → act | ✅ complete |
 | `drivers/simulated/` | Microscope, plate reader, liquid handler, incubator | ✅ complete |
 | `drivers/` | SCPI, WoT, MicroManager, SiLA2, OPC UA LADS, Opentrons | ✅ complete |
@@ -51,7 +51,7 @@ updated as each layer lands.
 | `campaign/` | Closed-loop autonomous experimentation: search space, objectives, GP-EI planner, runner | ✅ complete |
 | `evals/` | Scored agent evals: 6 tasks (capability/safety/recovery), graded mechanically, any dialect | ✅ complete |
 | `cli.py` | `serve` · `doctor` · `devices` · `tools` · `ledger` · `call` · `experiment run` · `campaign run` · `eval run` | ✅ complete |
-| `tests/` | 453 tests: unit, real-protocol integration, CLI, and a driver×dialect conformance matrix | ✅ complete |
+| `tests/` | 469 tests: unit, real-protocol integration, CLI, and a driver×dialect conformance matrix | ✅ complete |
 | `examples/` | A working agent loop per dialect (Claude, GPT, Gemini, zero-SDK generic) | ✅ complete |
 
 ---
@@ -388,7 +388,7 @@ labbench ledger verify
 
 ```bash
 uv sync --extra dev --extra all   # gateway + every optional instrument library + pytest/ruff
-uv run pytest                     # 453 tests: unit, conformance, real-protocol integration, CLI
+uv run pytest                     # 469 tests: unit, conformance, real-protocol integration, CLI
 uv run ruff check src tests examples
 ```
 

@@ -18,6 +18,7 @@ supervise long work, and audit what happened.
 
 from __future__ import annotations
 
+import asyncio
 import time
 from typing import Any
 
@@ -115,6 +116,37 @@ def register_tools(router: Router, gateway: Any) -> None:
             sample = await dev.read(feature, property)
             return sample.model_dump(mode="json")
         return {"device": device, "properties": await dev.read_all(feature)}
+
+    @router.method("lab.snapshot")
+    async def lab_snapshot() -> dict[str, Any]:
+        """Every instrument's current readable state, in one call.
+
+        The alternative is `device.read`, once per instrument -- fine for
+        one, expensive in tool calls and context for a session juggling
+        several. This is the "what's actually true right now" call an agent
+        should reach for at the start of a multi-instrument session, or
+        after stepping away from one, instead of re-reading each device in
+        turn. It carries readable properties only -- a plate's barcode,
+        location and contents are exactly as visible here as an instrument's
+        own state, because both are ordinary properties of some device; it
+        is not a second, schema-carrying view like `device.describe`, and it
+        never touches anything, so it is never gated.
+
+        A device that fails to read (offline, faulted) is reported as such
+        rather than blanking the whole snapshot -- the same "one bad
+        instrument does not stop the rest" rule `lab.describe` follows.
+        """
+        devices = gateway.devices.all()
+
+        async def snapshot_one(device_id: str, device: Any) -> tuple[str, dict[str, Any]]:
+            try:
+                properties = await device.read_all()
+            except Exception as exc:  # noqa: BLE001 - reported per device, not raised
+                return device_id, {"state": device.state.value, "error": str(exc)}
+            return device_id, {"state": device.state.value, "properties": properties}
+
+        results = await asyncio.gather(*(snapshot_one(did, d) for did, d in devices.items()))
+        return {"lab": gateway.config.name, "devices": dict(results)}
 
     @router.method("device.write")
     async def device_write(
@@ -771,6 +803,18 @@ def tool_specs(gateway: Any) -> list[ToolSpec]:
                 "property": string,
             }, ["device"]),
             read_only=True, idempotent=True, hazard="none", tags=["observation"],
+        ),
+        ToolSpec(
+            name="lab.snapshot",
+            description="Every instrument's current readable state, in one call - the "
+                        "alternative to calling device.read once per instrument. Reach for "
+                        "this at the start of a multi-instrument session, or after stepping "
+                        "away from one, to reorient in a single round trip. A plate's barcode, "
+                        "location and contents show up here exactly like any other device "
+                        "property. Never gated; a device that fails to read is reported as "
+                        "such rather than blanking the whole snapshot.",
+            parameters=obj({}),
+            read_only=True, idempotent=True, hazard="none", tags=["discovery", "observation"],
         ),
         ToolSpec(
             name="device.simulate",

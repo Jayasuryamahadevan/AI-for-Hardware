@@ -213,3 +213,56 @@ class TestGroundTruthStripping:
         job = await _wait_for_job(gateway, result["job"]["job_id"])
         assert job.result is not None
         assert not any(k.startswith("truth_") for k in job.result)
+
+
+class TestSnapshot:
+    """`lab.snapshot`: every instrument's readable state in one call, instead
+    of `device.read` once per instrument."""
+
+    async def _call(self, gateway):
+        from labbench.protocol.jsonrpc import Request
+        from labbench.protocol.router import RpcContext
+
+        response = await gateway.router.dispatch(
+            Request("lab.snapshot", {}, id=1), RpcContext(actor="test"),
+        )
+        assert response is not None and response.error is None
+        return response.result
+
+    async def test_reports_every_configured_device(self, gateway):
+        result = await self._call(gateway)
+        assert set(result["devices"]) == {"scope1", "reader1", "handler1", "incubator1"}
+
+    async def test_each_device_carries_its_properties_and_state(self, gateway):
+        result = await self._call(gateway)
+        scope = result["devices"]["scope1"]
+        assert scope["state"] == "idle"
+        assert "MotionControl.x_um" in scope["properties"]
+        assert "FocusControl.focus_score" in scope["properties"]
+
+    async def test_labware_state_is_visible_as_ordinary_properties(self, gateway):
+        result = await self._call(gateway)
+        # A plate's location and a slot's occupant are properties like any
+        # other -- lab.snapshot needs no special labware-aware code path.
+        assert "Labware.plates" in result["devices"]["handler1"]["properties"]
+        assert "PlateStorage.contents" in result["devices"]["incubator1"]["properties"]
+        assert "PlateTransport.loaded_barcode" in result["devices"]["reader1"]["properties"]
+
+    async def test_reflects_a_change_made_since_the_last_snapshot(self, gateway):
+        before = await self._call(gateway)
+        assert before["devices"]["handler1"]["properties"]["Labware.plates"] == []
+
+        await gateway.invoke(
+            "handler1", "Labware", "create_plate", {"barcode": "SNAP1"}, actor="test",
+        )
+        after = await self._call(gateway)
+        assert after["devices"]["handler1"]["properties"]["Labware.plates"] == ["SNAP1"]
+
+    async def test_is_never_gated(self, gateway):
+        # No autonomy level, rule or approval requirement should ever touch
+        # a call that only reads.
+        from labbench.core.safety import AutonomyLevel
+
+        gateway.safety.policy.autonomy = AutonomyLevel.MANUAL
+        result = await self._call(gateway)
+        assert set(result["devices"]) == {"scope1", "reader1", "handler1", "incubator1"}
