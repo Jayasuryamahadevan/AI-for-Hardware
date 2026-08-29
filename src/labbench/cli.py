@@ -12,6 +12,8 @@ experiment is misbehaving, and it should depend on as little as possible.
     labbench call       --config lab.yaml <method> [key=value ...]
     labbench experiment run --config lab.yaml protocol.yaml [var=value ...]
     labbench campaign   run --config lab.yaml campaign.yaml
+    labbench eval       list
+    labbench eval       run --dialect anthropic [--task ID ...]
 """
 
 from __future__ import annotations
@@ -517,6 +519,54 @@ async def _campaign_run(args: argparse.Namespace) -> int:
         await gateway.close()
 
 
+# -- eval ----------------------------------------------------------------
+
+
+async def _eval_list(args: argparse.Namespace) -> int:
+    from .evals.tasks import all_tasks
+
+    for task in all_tasks():
+        print(f"{task.id:<24} {task.category:<12} {task.description}")
+    return 0
+
+
+async def _eval_run(args: argparse.Namespace) -> int:
+    """Run one or more eval tasks against a real model and grade the result.
+
+    Deliberately not part of `uv run pytest`: this spends a real API key and
+    is not deterministic in the way a unit test must be. `tests/test_evals.py`
+    covers the harness and every grader with `ScriptedPolicy` instead, which
+    needs neither.
+    """
+    from .evals.harness import EvalRunner
+    from .evals.policy import AnthropicPolicy, GeminiPolicy, OpenAIPolicy
+    from .evals.report import render_table, summarize
+    from .evals.tasks import all_tasks, get
+
+    tasks = [get(task_id) for task_id in args.task] if args.task else all_tasks()
+
+    def make_policy():
+        if args.dialect == "anthropic":
+            return AnthropicPolicy(args.model or "claude-sonnet-5")
+        if args.dialect == "openai":
+            return OpenAIPolicy(args.model or "gpt-4o", base_url=args.base_url)
+        return GeminiPolicy(args.model or "gemini-2.0-flash")
+
+    runner = EvalRunner(
+        data_dir=Path(args.data_dir or "./labbench-data") / "evals", max_turns=args.max_turns,
+    )
+    results = []
+    for task in tasks:
+        print(f"labbench: running {task.id} ({args.dialect})...", file=sys.stderr)
+        results.append(await runner.run(task, make_policy()))
+
+    if args.json:
+        _emit(summarize(results))
+    else:
+        print(render_table(results))
+    return 0 if all(r.passed for r in results) else 1
+
+
 # -- argument parsing ------------------------------------------------------
 
 
@@ -612,6 +662,27 @@ def build_parser() -> argparse.ArgumentParser:
     campaign_run.add_argument("-c", "--config", required=True)
     campaign_run.add_argument("campaign", help="Path to a campaign YAML file.")
     campaign_run.set_defaults(func=_campaign_run)
+
+    eval_parser = sub.add_parser(
+        "eval", parents=[common], help="Run scored agent evals against the simulated lab."
+    )
+    eval_sub = eval_parser.add_subparsers(dest="eval_command", required=True)
+
+    eval_list = eval_sub.add_parser("list", parents=[common], help="List available eval tasks.")
+    eval_list.set_defaults(func=_eval_list)
+
+    eval_run = eval_sub.add_parser(
+        "run", parents=[common], help="Run one or more eval tasks against a real model."
+    )
+    eval_run.add_argument("-d", "--dialect", required=True, choices=["anthropic", "openai", "gemini"])
+    eval_run.add_argument("-m", "--model", default=None, help="Defaults to a sane per-dialect model.")
+    eval_run.add_argument("--base-url", default=None,
+                          help="For --dialect openai against a local OpenAI-compatible server.")
+    eval_run.add_argument("-t", "--task", action="append", default=None,
+                          help="Repeatable; omit to run every task (see 'labbench eval list').")
+    eval_run.add_argument("--max-turns", type=int, default=8)
+    eval_run.add_argument("--json", action="store_true")
+    eval_run.set_defaults(func=_eval_run)
 
     return parser
 
