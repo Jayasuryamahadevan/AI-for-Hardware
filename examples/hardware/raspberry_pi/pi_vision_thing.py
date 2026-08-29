@@ -49,10 +49,23 @@ Run it:
         --labels ~/labbench-pi/model/imagenet_labels.txt
 
 Then point a lab config at it -- see ../../../configs/raspberry-pi-vision-lab.yaml.
-No camera or TPU is required just to try the shape of this: with neither
-installed the script still serves cpu_temp_c/cpu_load_pct/uptime_s and reports
-`tpu_present: false`; `snap`/`classify` fail with a clear message instead of
-faking a frame, the same "a driver that cannot predict must say so" rule the
+
+No camera is required to exercise the Edge TPU for real: pass `--test-image
+some.jpg` and every `snap`/`classify` serves that file instead of a live
+frame -- for a machine with no camera at all, a Pi camera that is physically
+blocked, or testing the TPU half of this script on its own. The classic Coral
+demo image works well for a first check with a known-good answer:
+
+    curl -LO https://github.com/google-coral/test_data/raw/master/parrot.jpg
+    python3 pi_vision_thing.py --test-image parrot.jpg \
+        --model ~/labbench-pi/model/mobilenet_v2_1.0_224_quant_edgetpu.tflite \
+        --labels ~/labbench-pi/model/imagenet_labels.txt
+
+Neither a camera nor a TPU is required just to try the shape of this: with
+neither installed the script still serves cpu_temp_c/cpu_load_pct/uptime_s
+and reports `tpu_present: false`; `snap`/`classify` fail with a clear message
+instead of faking a frame, the same "a driver that cannot predict must say so"
+rule the
 rest of this project holds simulated drivers to.
 """
 
@@ -136,10 +149,40 @@ def read_label_file(path: str) -> dict[int, str]:
     return labels
 
 
+class _StaticImageSource:
+    """Stands in for Picamera2 when there is no working camera at all -- a
+    laptop with none attached, a Pi camera that is physically blocked or not
+    yet wired up, or simply testing the Edge TPU half of this script on its
+    own. `snap`/`classify` still exercise the real resize -> inference path
+    end to end; only the frame itself is fixed rather than live. This is not
+    a workaround bolted on for one test run -- it is the honest answer to
+    "what does this script do with no camera", the same way `tpu_present:
+    false` is the honest answer to no Coral device, rather than the two
+    hardware halves being unable to be exercised independently."""
+
+    def __init__(self, path: Path) -> None:
+        from PIL import Image
+
+        self.path = path
+        with Image.open(path) as img:
+            self.array = np.asarray(img.convert("RGB"))
+
+    def capture_array(self) -> np.ndarray:
+        return self.array
+
+    def capture_file(self, path: str) -> None:
+        import shutil
+
+        shutil.copyfile(self.path, path)
+
+
 class VisionStation:
     """Owns the camera and the interpreter; the HTTP handler just calls this."""
 
-    def __init__(self, *, model_path: str | None, labels_path: str | None, image_dir: Path) -> None:
+    def __init__(
+        self, *, model_path: str | None, labels_path: str | None, image_dir: Path,
+        test_image: str | None = None,
+    ) -> None:
         self.image_dir = image_dir
         self.image_dir.mkdir(parents=True, exist_ok=True)
         self._frame_count = 0
@@ -147,7 +190,11 @@ class VisionStation:
 
         self.camera = None
         self.resolution = (1920, 1080)
-        if Picamera2 is not None:
+        if test_image:
+            self.camera = _StaticImageSource(Path(test_image).expanduser())
+            height, width = self.camera.array.shape[:2]
+            self.resolution = (width, height)
+        elif Picamera2 is not None:
             self.camera = Picamera2()
             config = self.camera.create_still_configuration(
                 main={"size": self.resolution, "format": "RGB888"}
@@ -398,22 +445,31 @@ def main() -> None:
     parser.add_argument("--model", default=None, help="Edge-TPU-compiled .tflite model")
     parser.add_argument("--labels", default=None, help="Coral-format label file")
     parser.add_argument("--image-dir", default="~/labbench-pi/images")
+    parser.add_argument(
+        "--test-image", default=None,
+        help="Serve this JPEG/PNG for every snap/classify instead of a live camera -- "
+             "for a machine with no camera, one that is physically blocked, or testing "
+             "the Edge TPU half of this script on its own.",
+    )
     args = parser.parse_args()
 
-    if Picamera2 is None:
+    if not args.test_image and Picamera2 is None:
         print("warning: picamera2 not importable; snap/classify will report 'no camera'")
     if args.model and tflite is None:
         print("warning: tflite-runtime not importable; classify will report 'no Edge TPU interpreter'")
 
     station = VisionStation(
         model_path=args.model, labels_path=args.labels,
-        image_dir=Path(args.image_dir).expanduser(),
+        image_dir=Path(args.image_dir).expanduser(), test_image=args.test_image,
     )
     base_url = f"http://{args.host if args.host != '0.0.0.0' else _local_ip()}:{args.port}"
     server = ThreadingHTTPServer((args.host, args.port), make_handler(station, base_url))
     print(f"pi-vision-station serving on {base_url}")
     print(f"  Thing Description: {base_url}/.well-known/wot-thing-description")
-    print(f"  camera: {'present' if station.camera is not None else 'NOT DETECTED'}")
+    camera_state = "static test image" if args.test_image else (
+        "present" if station.camera is not None else "NOT DETECTED"
+    )
+    print(f"  camera: {camera_state}")
     print(f"  Edge TPU: {'present' if station.tpu_present else 'NOT DETECTED'}")
     try:
         server.serve_forever()

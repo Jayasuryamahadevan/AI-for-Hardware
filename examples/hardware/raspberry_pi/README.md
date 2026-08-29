@@ -27,10 +27,22 @@ illumination really does bleach a specimen there.
 
 ## Setup
 
-On the Raspberry Pi (Raspberry Pi OS Bookworm, Pi 4 or 5):
+On the Raspberry Pi (Raspberry Pi OS Bookworm, Pi 4 or 5), or any Linux
+x86_64/aarch64 machine with a Coral USB Accelerator attached — the Edge TPU
+half of this script does not require a Pi:
 
 ```bash
-sudo apt install -y python3-picamera2 python3-pycoral
+sudo apt install -y python3-picamera2      # camera; Pi only
+pip install tflite-runtime                 # NOT pycoral -- see below
+
+# The native Edge TPU runtime is a shared library, not a Python package, and
+# is the one piece that genuinely needs root (it installs a udev rule
+# granting non-root USB access):
+curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg \
+    | sudo gpg --dearmor -o /usr/share/keyrings/coral-edgetpu.gpg
+echo "deb [signed-by=/usr/share/keyrings/coral-edgetpu.gpg] https://packages.cloud.google.com/apt coral-edgetpu-stable main" \
+    | sudo tee /etc/apt/sources.list.d/coral-edgetpu.list
+sudo apt-get update && sudo apt-get install -y libedgetpu1-std
 # A Coral USB Accelerator works over USB3 on both Pi 4 and Pi 5; plug it in
 # before starting the script. No PCIe/M.2 Coral module is assumed.
 
@@ -43,6 +55,15 @@ python3 pi_vision_thing.py \
   --labels ~/labbench-pi/model/imagenet_labels.txt
 ```
 
+**Not `pip install pycoral`.** The package PyPI serves under that name is not
+Google's real library — three lines with none of the actual
+`pycoral.utils`/`pycoral.adapters` code, found the hard way bringing this
+script up against a real Coral device. The real pycoral is apt-only
+(`python3-pycoral`, from the repo above), which is fine on a Pi but a silent
+dead end anywhere else. This script needs neither: `tflite-runtime` plus
+`Interpreter.experimental_delegates=[load_delegate(...)]` is the whole of
+what pycoral wrapped.
+
 It prints the URL to put in a lab config, e.g.:
 
 ```
@@ -52,12 +73,31 @@ pi-vision-station serving on http://192.168.1.50:8080
   Edge TPU: present
 ```
 
-**Neither the camera nor the TPU is required just to try this.** With
-picamera2 or pycoral missing, or no Coral device plugged in, the script still
-serves telemetry and reports `tpu_present: false`; `snap`/`classify` fail
-with a clear `503` explaining exactly what's missing rather than fabricating
-a frame — the same "a driver that cannot predict must say so" rule the rest
-of this project holds simulated drivers to.
+**No camera at all — none attached, or a Pi camera that's physically
+blocked?** Pass `--test-image` and every `snap`/`classify` serves a fixed
+file for real instead of a live frame; the classic Coral demo image gives a
+known-good answer to check against:
+
+```bash
+curl -LO https://github.com/google-coral/test_data/raw/master/parrot.jpg
+python3 pi_vision_thing.py --test-image parrot.jpg \
+  --model ~/labbench-pi/model/mobilenet_v2_1.0_224_quant_edgetpu.tflite \
+  --labels ~/labbench-pi/model/imagenet_labels.txt
+```
+
+This is the permanent, real answer to "no camera" — `_StaticImageSource`
+implements the exact same interface `Picamera2` does, so `VisionStation`
+cannot tell the difference and every other code path (resize, inference,
+artifact serving) runs for real. It is not a substitute for testing the
+Edge TPU itself: `classify` still needs a real Coral device and
+`libedgetpu1-std` regardless of where the pixels came from.
+
+**Neither the camera nor the TPU is required just to try the shape of
+this.** With picamera2/tflite-runtime missing, or no Coral device plugged
+in, the script still serves telemetry and reports `tpu_present: false`;
+`snap`/`classify` fail with a clear `503` explaining exactly what's missing
+rather than fabricating a frame — the same "a driver that cannot predict
+must say so" rule the rest of this project holds simulated drivers to.
 
 ## Point LabBench at it
 

@@ -153,6 +153,47 @@ class TestStationLogicWithFakeHardware:
         assert equipped_station.interpreter.last_input.shape == (1, 224, 224, 3)
 
 
+class TestStaticImageSource:
+    """`--test-image`: the real, permanent answer to "no camera at all" --
+    not a fake object standing in for one, the actual `_StaticImageSource`
+    class a real VisionStation uses when given the flag."""
+
+    @pytest.fixture
+    def test_image(self, tmp_path) -> Path:
+        from PIL import Image
+
+        path = tmp_path / "fixed_frame.jpg"
+        # A distinct, uniform colour so mean_brightness is exactly checkable
+        # rather than merely "close to something plausible".
+        Image.new("RGB", (300, 200), color=(60, 60, 60)).save(path)
+        return path
+
+    def test_station_uses_the_file_instead_of_a_camera(self, pi_module, tmp_path, test_image):
+        station = pi_module.VisionStation(
+            model_path=None, labels_path=None, image_dir=tmp_path, test_image=str(test_image),
+        )
+        assert isinstance(station.camera, pi_module._StaticImageSource)
+        assert station.resolution == (300, 200)
+
+    def test_snap_reports_the_fixed_frame_for_real(self, pi_module, tmp_path, test_image):
+        station = pi_module.VisionStation(
+            model_path=None, labels_path=None, image_dir=tmp_path, test_image=str(test_image),
+        )
+        result = station.snap()
+        assert result["width"] == 300
+        assert result["height"] == 200
+        assert result["mean_brightness"] == pytest.approx(60.0, abs=0.5)
+
+    def test_snap_is_reproducible_across_calls(self, pi_module, tmp_path, test_image):
+        """Every call serves the same fixed frame -- the point of a static
+        source is a known-good, repeatable answer, not a new random one."""
+        station = pi_module.VisionStation(
+            model_path=None, labels_path=None, image_dir=tmp_path, test_image=str(test_image),
+        )
+        first, second = station.snap(), station.snap()
+        assert first["mean_brightness"] == second["mean_brightness"]
+
+
 class TestThroughTheRealWotDriverAndGateway:
     """The point of the exercise: everything above, reached the way LabBench
     actually reaches it -- device.describe, device.read, device.invoke,
