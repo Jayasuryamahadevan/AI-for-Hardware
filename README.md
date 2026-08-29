@@ -43,7 +43,7 @@ updated as each layer lands.
 | `bridge/` | Tool schemas (6 AI dialects), human-approval broker | ✅ complete |
 | `bridge/toolset.py` | The gateway tool surface (29 tools, 47 methods) | ✅ complete |
 | `gateway.py` | Assembly: request → ledger → safety → approval → act | ✅ complete |
-| `drivers/simulated/` | Microscope, plate reader, liquid handler, incubator | ✅ complete |
+| `drivers/simulated/` | Microscope, plate reader, liquid handler, incubator, shared locked labware | ✅ complete |
 | `drivers/` | SCPI, WoT, MicroManager, SiLA2, OPC UA LADS, Opentrons | ✅ complete |
 | `configs/` | A complete four-instrument simulated lab, plus a runnable campaign | ✅ complete |
 | `memory/` | Durable notes and documents an agent can search (SQLite, filesystem) | ✅ complete |
@@ -51,7 +51,7 @@ updated as each layer lands.
 | `campaign/` | Closed-loop autonomous experimentation: search space, objectives, GP-EI planner, runner | ✅ complete |
 | `evals/` | Scored agent evals: 6 tasks (capability/safety/recovery), graded mechanically, any dialect | ✅ complete |
 | `cli.py` | `serve` · `doctor` · `devices` · `tools` · `ledger` · `call` · `experiment run` · `campaign run` · `eval run` | ✅ complete |
-| `tests/` | 469 tests: unit, real-protocol integration, CLI, and a driver×dialect conformance matrix | ✅ complete |
+| `tests/` | 471 tests: unit, real-protocol integration, CLI, and a driver×dialect conformance matrix | ✅ complete |
 | `examples/` | A working agent loop per dialect (Claude, GPT, Gemini, zero-SDK generic) | ✅ complete |
 
 ---
@@ -274,6 +274,55 @@ ledger before episodes got their own directory.
 
 ---
 
+## Multiple instruments, one physical bench
+
+A biology or drug-discovery workflow is rarely one instrument: a plate the
+liquid handler fills is the same plate the incubator warms and the same plate
+the reader measures, and getting that wrong — reading a plate nobody filled,
+storing one that is already elsewhere — is the error that actually matters in
+a real lab. Four things hold this together, and the first is not new; it is
+what the other three build on.
+
+**A plate has one identity across every instrument.** `drivers/simulated/_labware.py`
+keeps every plate in a process-wide store keyed by barcode, with a `location`
+field naming whichever device currently holds it. A liquid handler's dispense,
+an incubator's shelf, and a plate reader's read chamber all resolve the *same*
+object, so "the plate handler1 just filled" and "the plate reader1 just read"
+are provably the same plate, not two instruments' independent fictions.
+
+**That plate can only be touched by one instrument at a time.** Three separate
+`Device` objects sharing one physical plate means three separate event-loop
+tasks can be mid-command against it at once — and that was a real race, not a
+hypothetical one: `load_plate`/`store_plate` check a plate's location, then
+`await` (door and settle timing) before claiming it, and a multi-cycle kinetic
+read holds a plate reference across many `await` points while mutating it
+each cycle. `PlateStore.hold(barcode)` is a per-barcode lock, held for exactly
+as long as a command that touches that plate runs; two different barcodes
+never wait on each other.
+
+**A command may only act on a plate it can physically reach.** `load_plate`
+and `store_plate` already refused to run against a plate sitting somewhere
+else; the liquid handler's dispense/aspirate/mix did not check this at all,
+and the incubator's own `simulate()` was more permissive than the command it
+was supposed to be predicting. Both now share one rule: a plate must be on
+the bench or already at the device asking.
+
+**A device's declared containment level is enforced, not decorative.**
+`labels: {biosafety: "BSL3"}` in a lab config used to be read by `lab.find`
+for discovery and nothing else. `SafetyPolicy.label_hazard_floors` lets a site
+map a label to a hazard floor, so a benign-looking command on a BSL-3 cabinet
+inherits BSL-3's approval requirement the same way an intrinsically
+biological command already does — never applied to a pure read, which changes
+nothing about the sample the label describes a risk to.
+
+And because none of this is worth much if an agent has to re-read every
+instrument to find out what any of it means: **`lab.snapshot`** aggregates
+every device's current readable state — including a plate's barcode, location
+and contents, which are ordinary properties like any other — into one call,
+so a multi-instrument session reorients in one round trip instead of N.
+
+---
+
 ## Design decisions worth knowing
 
 **The tool surface is fixed, not generated per command.** A six-instrument lab
@@ -388,7 +437,7 @@ labbench ledger verify
 
 ```bash
 uv sync --extra dev --extra all   # gateway + every optional instrument library + pytest/ruff
-uv run pytest                     # 469 tests: unit, conformance, real-protocol integration, CLI
+uv run pytest                     # 471 tests: unit, conformance, real-protocol integration, CLI
 uv run ruff check src tests examples
 ```
 
