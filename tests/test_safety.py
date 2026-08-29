@@ -46,8 +46,10 @@ class _FakeDevice(Device):
         return await super()._simulate(feature, command, args)
 
 
-def make_device(sim: SimulationResult | None = None) -> _FakeDevice:
-    dev = _FakeDevice(DeviceDescriptor(id="dev1", simulated=True), sim=sim)
+def make_device(
+    sim: SimulationResult | None = None, *, labels: dict[str, str] | None = None,
+) -> _FakeDevice:
+    dev = _FakeDevice(DeviceDescriptor(id="dev1", simulated=True, labels=labels or {}), sim=sim)
     dev._state = dev._state.__class__.IDLE
     return dev
 
@@ -79,6 +81,59 @@ class TestHazardCeiling:
         decision = await kernel.authorize(make_device(), "F", "culture", {})
         assert decision.effect is Effect.REQUIRE_APPROVAL
         assert any("biological" in r for r in decision.reasons)
+
+
+class TestLabelHazardFloors:
+    """A device label (biosafety, containment, ...) raising a command's
+    effective hazard for gating -- see `SafetyPolicy.label_hazard_floors`."""
+
+    def _policy(self, **overrides) -> SafetyPolicy:
+        defaults = {
+            "autonomy": AutonomyLevel.FULL,  # ceiling would otherwise allow everything
+            "label_hazard_floors": {"biosafety:BSL3": Hazard.BIOLOGICAL},
+        }
+        defaults.update(overrides)
+        return SafetyPolicy(**defaults)
+
+    async def test_benign_command_on_a_labelled_device_is_escalated(self):
+        kernel = SafetyKernel(self._policy())
+        device = make_device(labels={"biosafety": "BSL3"})
+        decision = await kernel.authorize(device, "F", "benign", {})
+        assert decision.effect is Effect.REQUIRE_APPROVAL
+        assert decision.hazard is Hazard.BIOLOGICAL
+        assert any("hazard floor" in r for r in decision.reasons)
+
+    async def test_same_command_on_an_unlabelled_device_is_not_escalated(self):
+        kernel = SafetyKernel(self._policy())
+        decision = await kernel.authorize(make_device(), "F", "benign", {})
+        assert decision.allowed
+        assert decision.hazard is Hazard.BENIGN
+
+    async def test_a_pure_read_is_never_escalated(self):
+        # Reads change nothing about the sample the label is describing a risk
+        # to; escalating them would break the "reads are free" invariant every
+        # other read-only tool call in the gateway relies on.
+        kernel = SafetyKernel(self._policy())
+        device = make_device(labels={"biosafety": "BSL3"})
+        decision = await kernel.authorize(device, "F", "noop", {})
+        assert decision.allowed
+        assert decision.hazard is Hazard.NONE
+
+    async def test_a_floor_lower_than_the_commands_own_hazard_does_nothing(self):
+        policy = self._policy(label_hazard_floors={"biosafety:BSL1": Hazard.BENIGN})
+        kernel = SafetyKernel(policy)
+        # "consume" is intrinsically Hazard.SAMPLE, well above BSL1's benign floor.
+        device = make_device(labels={"biosafety": "BSL1"})
+        decision = await kernel.authorize(
+            device, "F", "consume", {},
+        )
+        assert decision.hazard is Hazard.SAMPLE
+
+    async def test_unrecognised_label_value_is_ignored(self):
+        kernel = SafetyKernel(self._policy())
+        device = make_device(labels={"biosafety": "none"})
+        decision = await kernel.authorize(device, "F", "benign", {})
+        assert decision.allowed
 
 
 class TestEnvelope:

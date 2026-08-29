@@ -133,6 +133,16 @@ class SafetyPolicy(BaseModel):
     #: Wall-clock windows in which autonomous operation is permitted, "HH:MM-HH:MM".
     allowed_hours: list[str] = Field(default_factory=list)
     rules: list[PolicyRule] = Field(default_factory=list)
+    #: Device labels that raise a command's *effective* hazard for gating,
+    #: keyed "label_key:label_value" (e.g. "biosafety:BSL3" -> "biological").
+    #: A label describes a property of the room a device sits in, not of any
+    #: one command, so a benign-looking command on a BSL-3 cabinet inherits
+    #: BSL-3's floor exactly as an intrinsically biological command would --
+    #: this is what makes `labels: {biosafety: "BSL3"}` in a lab config mean
+    #: something to the kernel instead of only to `lab.find`. A floor can only
+    #: ever raise the hazard used for gating, never lower it, and it never
+    #: touches a pure read (see `SafetyKernel.authorize`'s early return).
+    label_hazard_floors: dict[str, Hazard] = Field(default_factory=dict)
 
     def ceiling(self) -> Hazard:
         return self.hazard_ceiling or DEFAULT_HAZARD_CEILING[self.autonomy]
@@ -147,6 +157,9 @@ class Decision(BaseModel):
     device: str
     feature: str
     command: str
+    #: The hazard actually used for gating -- the command's own hazard, or a
+    #: device label's floor when that floor is higher. See
+    #: `SafetyPolicy.label_hazard_floors`.
     hazard: Hazard
     autonomy: AutonomyLevel
     reasons: list[str] = Field(default_factory=list)
@@ -262,6 +275,20 @@ class SafetyKernel:
                 violations.append(exc.message)
         return violations
 
+    # -- device labels ------------------------------------------------------
+
+    def _effective_hazard(self, device: Device, cmd: Command) -> tuple[Hazard, str | None]:
+        """`cmd.hazard`, raised to the highest floor any of the device's
+        labels imply. Never applied to a pure read -- see the caller."""
+        floor: Hazard | None = None
+        for key, value in device.descriptor.labels.items():
+            label_hazard = self.policy.label_hazard_floors.get(f"{key}:{value}")
+            if label_hazard is not None and (floor is None or label_hazard.rank > floor.rank):
+                floor = label_hazard
+        if floor is not None and floor.rank > cmd.hazard.rank:
+            return floor, f"device label sets a hazard floor of {floor.value!r}"
+        return cmd.hazard, None
+
     # -- full evaluation --------------------------------------------------
 
     async def authorize(
@@ -294,14 +321,17 @@ class SafetyKernel:
             decision.reasons = reasons
             if eff is Effect.REQUIRE_APPROVAL:
                 decision.approval_prompt = _approval_prompt(
-                    device, feature, command, args, cmd, reasons, reason
+                    device, feature, command, args, cmd, decision.hazard, reasons, reason
                 )
             return decision
 
         if effect is Effect.DENY:
             return finalize(Effect.DENY)
 
-        # Reads never gate. Everything else does.
+        # Reads never gate. Everything else does. This check uses the
+        # command's own hazard, not the label-escalated one: a label
+        # describes what the room can do to a sample, and a pure read
+        # changes nothing about the sample -- see `_effective_hazard`.
         if cmd.hazard is Hazard.NONE and not limits:
             return finalize(Effect.ALLOW)
 
@@ -310,18 +340,23 @@ class SafetyKernel:
             reasons.extend(violations)
             return finalize(Effect.DENY)
 
+        effective_hazard, label_reason = self._effective_hazard(device, cmd)
+        decision.hazard = effective_hazard
+        if label_reason:
+            reasons.append(label_reason)
+
         needs_approval = effect is Effect.REQUIRE_APPROVAL
         ceiling = pol.ceiling()
 
-        if cmd.hazard in ALWAYS_APPROVE:
+        if effective_hazard in ALWAYS_APPROVE:
             needs_approval = True
             reasons.append(
-                f"hazard class {cmd.hazard.value!r} always requires a human signature"
+                f"hazard class {effective_hazard.value!r} always requires a human signature"
             )
-        elif cmd.hazard.rank > ceiling.rank:
+        elif effective_hazard.rank > ceiling.rank:
             needs_approval = True
             reasons.append(
-                f"hazard {cmd.hazard.value!r} exceeds the ceiling {ceiling.value!r} "
+                f"hazard {effective_hazard.value!r} exceeds the ceiling {ceiling.value!r} "
                 f"for autonomy level {pol.autonomy.value} ({pol.autonomy.name})"
             )
 
@@ -336,13 +371,13 @@ class SafetyKernel:
 
         # -- gate 3: simulate before actuating -----------------------------
         thresh = pol.require_simulation_at_or_above
-        if thresh is not None and cmd.hazard.rank >= thresh.rank:
+        if thresh is not None and effective_hazard.rank >= thresh.rank:
             sim = await device.simulate(feature, command, args)
             decision.simulation = sim
             if sim.fidelity == "none":
                 reasons.append(
                     f"no digital twin for {feature}.{command}; outcome unverifiable "
-                    f"at hazard {cmd.hazard.value!r}"
+                    f"at hazard {effective_hazard.value!r}"
                 )
                 needs_approval = True
             if not sim.feasible or sim.violations:
@@ -387,14 +422,14 @@ class SafetyKernel:
 
 def _approval_prompt(
     device: Device, feature: str, command: str, args: dict[str, Any],
-    cmd: Command, reasons: list[str], intent: str,
+    cmd: Command, hazard: Hazard, reasons: list[str], intent: str,
 ) -> str:
     lines = [
         f"APPROVAL REQUIRED — {device.descriptor.display_name or device.id}"
         + (" [SIMULATED DEVICE]" if device.descriptor.simulated else ""),
         f"  action     : {feature}.{command}",
         f"  arguments  : {args}",
-        f"  hazard     : {cmd.hazard.value}   reversibility: {cmd.reversibility.value}",
+        f"  hazard     : {hazard.value}   reversibility: {cmd.reversibility.value}",
     ]
     if cmd.duration_estimate_s >= 1:
         lines.append(f"  est. time  : {cmd.duration_estimate_s:.0f}s")
