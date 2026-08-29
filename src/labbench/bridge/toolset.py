@@ -541,6 +541,87 @@ def register_tools(router: Router, gateway: Any) -> None:
 
         return replay_run(gateway.ledger, run_id).model_dump(mode="json")
 
+    # -- campaigns ----------------------------------------------------------
+
+    @router.method("campaign.validate")
+    async def campaign_validate(spec: dict[str, Any]) -> dict[str, Any]:
+        """Check a campaign's protocol, search space and objectives before running it.
+
+        Beyond what `experiment.validate` catches: every search dimension must
+        be bound to a step argument as `${name}`, and the values it could
+        propose at its extremes must sit inside that argument's envelope --
+        checked now, because an optimiser is exactly the caller that finds the
+        edge of the envelope empirically if nobody checked first.
+        """
+        from ..campaign import CampaignSpec
+
+        parsed = CampaignSpec.model_validate(spec)
+        problems = parsed.validate_against(gateway)
+        return {"valid": not problems, "problems": problems,
+                "dimensions": parsed.space.names, "objectives": [o.name for o in parsed.objectives]}
+
+    @router.method("campaign.start")
+    async def campaign_start(spec: dict[str, Any], ctx: RpcContext = None) -> dict[str, Any]:
+        """Begin a closed-loop campaign: propose a point, run it as a protocol,
+        extract the declared objectives, replan -- until the budget is spent or
+        an objective's target is reached. Long-running: returns a campaign
+        handle immediately. A trial whose hazard needs a human signature parks
+        the whole campaign on status `awaiting_approval`, exactly as
+        `experiment.start` parks on one of its steps; check `campaign.status`
+        and `campaign.resume` it once approved.
+        """
+        from ..campaign import CampaignSpec
+
+        parsed = CampaignSpec.model_validate(spec)
+        problems = parsed.validate_against(gateway)
+        if problems:
+            raise ValidationError(
+                f"campaign has {len(problems)} problem(s); call campaign.validate first",
+                problems=problems,
+            )
+        campaign_id = gateway.campaigns.define(parsed)
+        state = gateway.campaigns.start(campaign_id, actor=ctx.actor if ctx else "agent")
+        return {"campaign": state.summary(include_observations=False)}
+
+    @router.method("campaign.status")
+    async def campaign_status(campaign_id: str, include_observations: bool = True) -> dict[str, Any]:
+        """Progress, every trial evaluated so far, and any pending approval."""
+        return gateway.campaigns.get(campaign_id).summary(include_observations=include_observations)
+
+    @router.method("campaign.best")
+    async def campaign_best(campaign_id: str) -> dict[str, Any]:
+        """The best trial found so far by the scalarised objective score, plus
+        the Pareto front for a multi-objective campaign. Available at any
+        point, not only once the campaign finishes."""
+        return gateway.campaigns.best(campaign_id)
+
+    @router.method("campaign.list")
+    async def campaign_list(status: str | None = None, limit: int = 50) -> dict[str, Any]:
+        """Recent campaigns, newest first."""
+        from ..campaign import CampaignStatus
+
+        states = gateway.campaigns.list(
+            status=CampaignStatus(status) if status else None, limit=limit,
+        )
+        return {"campaigns": [s.summary(include_observations=False) for s in states],
+                "count": len(states)}
+
+    @router.method("campaign.cancel")
+    async def campaign_cancel(campaign_id: str, reason: str = "agent requested") -> dict[str, Any]:
+        """Stop a campaign. The in-flight trial is asked to finish or park; no new trial starts."""
+        state = await gateway.campaigns.cancel(campaign_id, reason=reason)
+        return state.summary()
+
+    @router.method("campaign.resume")
+    async def campaign_resume(campaign_id: str) -> dict[str, Any]:
+        """Continue a campaign parked on `awaiting_approval`, after a human has answered.
+
+        Resumes the exact trial that asked, with the same approval id, so it
+        proceeds only if that exact call was the one granted.
+        """
+        state = gateway.campaigns.resume(campaign_id)
+        return state.summary(include_observations=False)
+
     # -- self-description -------------------------------------------------
 
     @router.method("tools.schema")
@@ -871,6 +952,65 @@ def tool_specs(gateway: Any) -> list[ToolSpec]:
                         "tamper-evident ledger - what was decided, what ran, who approved what.",
             parameters=obj({"run_id": string}, ["run_id"]),
             read_only=True, idempotent=True, hazard="none", tags=["experiment", "provenance"],
+        ),
+        ToolSpec(
+            name="campaign.validate",
+            description="Check a closed-loop campaign (a protocol, a search space over its "
+                        "variables, and objectives to maximize/minimize/constrain) before "
+                        "running it. Catches an unbound search dimension and any value it "
+                        "could propose at its extremes that would leave the argument's "
+                        "declared envelope. Call this before campaign.start.",
+            parameters=obj({
+                "spec": {"type": "object",
+                         "description": "name, protocol, space (dimensions), objectives, "
+                                        "budget, initial_design, initial_design_size, seed."},
+            }, ["spec"]),
+            read_only=True, idempotent=True, hazard="none", tags=["campaign", "planning"],
+        ),
+        ToolSpec(
+            name="campaign.start",
+            description="Begin a closed-loop autonomous experimentation campaign: propose a "
+                        "point in the search space, run it as a protocol, extract the declared "
+                        "objectives from what was actually measured, replan with a Bayesian "
+                        "optimiser, repeat until the budget is spent or a target is reached. "
+                        "Long-running: returns a campaign handle immediately. A trial needing a "
+                        "human signature parks the whole campaign rather than failing it; check "
+                        "campaign.status and resume it once approved.",
+            parameters=obj({"spec": {"type": "object"}}, ["spec"]),
+            destructive=True, hazard="varies", tags=["campaign", "action"],
+        ),
+        ToolSpec(
+            name="campaign.status",
+            description="Progress, every trial evaluated so far (point tried, objective values, "
+                        "feasibility), and any pending approval for one campaign.",
+            parameters=obj({
+                "campaign_id": string,
+                "include_observations": {"type": "boolean", "default": True},
+            }, ["campaign_id"]),
+            read_only=True, idempotent=True, hazard="none", tags=["campaign"],
+        ),
+        ToolSpec(
+            name="campaign.best",
+            description="The best trial found so far, by the scalarised objective score, plus "
+                        "the Pareto front for a multi-objective campaign. Safe to call while the "
+                        "campaign is still running.",
+            parameters=obj({"campaign_id": string}, ["campaign_id"]),
+            read_only=True, idempotent=True, hazard="none", tags=["campaign"],
+        ),
+        ToolSpec(
+            name="campaign.cancel",
+            description="Stop a running campaign. The in-flight trial is asked to finish or "
+                        "park at its next safe point; no new trial starts. Use this the moment "
+                        "a campaign is clearly wasting budget on an infeasible region.",
+            parameters=obj({"campaign_id": string, "reason": string}, ["campaign_id"]),
+            hazard="benign", tags=["campaign"],
+        ),
+        ToolSpec(
+            name="campaign.resume",
+            description="Continue a campaign parked on awaiting_approval, after a human has "
+                        "granted or denied the pending action via approval.grant/approval.deny.",
+            parameters=obj({"campaign_id": string}, ["campaign_id"]),
+            hazard="varies", tags=["campaign"],
         ),
         ToolSpec(
             name="estop",

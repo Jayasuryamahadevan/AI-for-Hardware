@@ -142,6 +142,21 @@ class Protocol(BaseModel):
         return problems
 
 
+def direct_variable_ref(value: Any) -> str | None:
+    """The variable name when `value` is *exactly* `${name}`, else None.
+
+    Used by `campaign.CampaignSpec` to find which step argument a search
+    dimension binds to, so its envelope can be checked before a planner ever
+    proposes it. A reference embedded in a larger string (`"z=${z_um}"`) is
+    deliberately not matched: that shape cannot be substituted back into a
+    typed argument, so nothing there is a dimension binding.
+    """
+    if not isinstance(value, str):
+        return None
+    whole = _REF.fullmatch(value)
+    return whole.group(1) if whole else None
+
+
 def _lookup(path: str, scope: dict[str, Any]) -> Any:
     node: Any = scope
     for part in path.split("."):

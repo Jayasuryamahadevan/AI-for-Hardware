@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import Any, Self
 
 from .bridge.approval import ApprovalBroker, ApprovalState
+from .campaign import CampaignManager, CampaignState
 from .core.device import Device, DeviceEvent, ExecutionContext
 from .core.errors import (
     ApprovalDenied,
@@ -69,6 +70,7 @@ class Gateway:
             data_dir=self.data_dir,
         )
         self.experiments = ExperimentManager(invoke=self.invoke, ledger=self.ledger)
+        self.campaigns = CampaignManager(experiments=self.experiments, ledger=self.ledger)
         self.router = Router()
         self.started = time.time()
         #: Sinks that fan events out to connected transports.
@@ -78,6 +80,7 @@ class Gateway:
         self.devices.subscribe_all(self._on_device_event)
         self.jobs.watch(self._on_job_update)
         self.experiments.watch(self._on_experiment_update)
+        self.campaigns.watch(self._on_campaign_update)
 
         from .bridge.toolset import register_tools
 
@@ -129,6 +132,11 @@ class Gateway:
         # moment a watcher gets around to them; this is only the live feed.
         await self._broadcast("experiment.update", run.summary(include_steps=False))
 
+    async def _on_campaign_update(self, state: CampaignState) -> None:
+        # Same split as _on_experiment_update: CampaignManager already writes
+        # campaign_start/campaign_trial_*/campaign_end to the ledger itself.
+        await self._broadcast("campaign.update", state.summary(include_observations=False))
+
     def _record_approval(self, request: Any) -> None:
         self.ledger.log(
             "approval",
@@ -172,6 +180,7 @@ class Gateway:
         if self._closed:
             return
         self._closed = True
+        await self.campaigns.shutdown()
         await self.experiments.shutdown()
         await self.jobs.shutdown()
         await self.devices.disconnect_all()
@@ -408,6 +417,9 @@ class Gateway:
             "memory_stores": self.memory.ids(),
             "experiments_running": len(
                 [r for r in self.experiments.list() if not r.status.terminal]
+            ),
+            "campaigns_running": len(
+                [c for c in self.campaigns.list() if not c.status.terminal]
             ),
         }
 

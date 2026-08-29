@@ -41,15 +41,16 @@ updated as each layer lands.
 | `protocol/` | HTTP/1.1 server, SSE, WebSocket (RFC 6455), stdio | ✅ complete |
 | `protocol/client.py` | Client for all three transports, one call surface | ✅ complete |
 | `bridge/` | Tool schemas (6 AI dialects), human-approval broker | ✅ complete |
-| `bridge/toolset.py` | The gateway tool surface (22 tools, 39 methods) | ✅ complete |
+| `bridge/toolset.py` | The gateway tool surface (28 tools, 46 methods) | ✅ complete |
 | `gateway.py` | Assembly: request → ledger → safety → approval → act | ✅ complete |
 | `drivers/simulated/` | Microscope, plate reader, liquid handler, incubator | ✅ complete |
 | `drivers/` | SCPI, WoT, MicroManager, SiLA2, OPC UA LADS, Opentrons | ✅ complete |
-| `configs/` | A complete four-instrument simulated lab | ✅ complete |
+| `configs/` | A complete four-instrument simulated lab, plus a runnable campaign | ✅ complete |
 | `memory/` | Durable notes and documents an agent can search (SQLite, filesystem) | ✅ complete |
 | `experiment/` | Protocols, runs, replay | ✅ complete |
-| `cli.py` | `serve` · `doctor` · `devices` · `tools` · `ledger` · `call` · `experiment run` | ✅ complete |
-| `tests/` | 325 tests: unit, real-protocol integration, CLI, and a driver×dialect conformance matrix | ✅ complete |
+| `campaign/` | Closed-loop autonomous experimentation: search space, objectives, GP-EI planner, runner | ✅ complete |
+| `cli.py` | `serve` · `doctor` · `devices` · `tools` · `ledger` · `call` · `experiment run` · `campaign run` | ✅ complete |
+| `tests/` | 430 tests: unit, real-protocol integration, CLI, and a driver×dialect conformance matrix | ✅ complete |
 | `examples/` | A working agent loop per dialect (Claude, GPT, Gemini, zero-SDK generic) | ✅ complete |
 
 ---
@@ -169,10 +170,11 @@ ALCOA+ ask for, and what a reproducibility claim needs regardless of regulation.
 
 ---
 
-## Memory and experiments
+## Memory, experiments and campaigns
 
-Two layers sit on top of the device model, for the same reason a lab notebook
-and a written protocol sit on top of raw bench work.
+Three layers sit on top of the device model, for the same reason a lab
+notebook, a written protocol and a standing operating procedure for a
+multi-day titration all sit on top of raw bench work.
 
 **`memory/` — durable, searchable notes.** `ledger.note` is a timestamped,
 immutable entry in the audit trail — right for "what happened," wrong for
@@ -201,6 +203,31 @@ digest binding exists to prevent for a single call.
 
 ```bash
 labbench experiment run -c configs/simulated-lab.yaml protocol.yaml
+```
+
+**`campaign/` — closed-loop autonomous experimentation.** A `Protocol` run
+once answers a question an operator already knew how to ask. A `Campaign`
+answers one nobody has run the numbers on yet: *what setting is best*. A
+`CampaignSpec` binds a `Protocol` to a `ParameterSpace` (the dimensions an
+optimiser may search, each reusing `core.capability.Parameter`'s own bounds
+checking so there is no second envelope to keep in sync) and a list of
+`Objective`s to maximize, minimize or treat as a hard constraint. From there a
+campaign is nothing but a disciplined, repeated caller of the same front door
+`experiment.start` already uses: propose a point with a from-scratch
+Gaussian-process/Expected-Improvement planner (numpy only — see this
+project's three runtime dependencies), bind it to the protocol's variables,
+run it, extract the declared objectives from what the instrument *actually
+measured* (the gateway strips every simulated driver's `truth_*` ground-truth
+key at the boundary, so a campaign against a simulated microscope proves the
+same thing a campaign against a real one would), replan. A trial whose hazard
+needs a human signature parks the *whole campaign*, exactly as a protocol run
+parks around one step; `campaign.resume` continues it once `approval.grant`
+has answered. `campaign.best` reports the best trial by a normalised,
+infeasible-trials-penalised score at any point mid-campaign, alongside the
+Pareto front for when more than one objective is being traded off.
+
+```bash
+labbench campaign run -c configs/simulated-lab.yaml configs/autofocus-campaign.yaml
 ```
 
 ---
@@ -299,6 +326,13 @@ labbench call -c configs/simulated-lab.yaml device.invoke \
   device=scope1 feature=MotionControl command=home reason="prepare for imaging"
 ```
 
+Or hand it a whole search rather than one call — the same simulated
+microscope, this time hunting for the sharpest, unsaturated frame:
+
+```bash
+labbench campaign run -c configs/simulated-lab.yaml configs/autofocus-campaign.yaml
+```
+
 And read back everything that happened, with the chain intact:
 
 ```bash
@@ -312,7 +346,7 @@ labbench ledger verify
 
 ```bash
 uv sync --extra dev --extra all   # gateway + every optional instrument library + pytest/ruff
-uv run pytest                     # 325 tests: unit, conformance, real-protocol integration, CLI
+uv run pytest                     # 430 tests: unit, conformance, real-protocol integration, CLI
 uv run ruff check src tests examples
 ```
 

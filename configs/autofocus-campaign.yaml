@@ -1,0 +1,67 @@
+# A closed-loop campaign against the shipped simulated microscope: search
+# focus height and exposure to maximise sharpness while keeping the frame
+# unsaturated. Run it against configs/simulated-lab.yaml:
+#
+#   labbench campaign run -c configs/simulated-lab.yaml configs/autofocus-campaign.yaml
+#
+# Each trial is the two-step protocol below, with z_um/exposure_ms bound from
+# the search space; `experiment.start`/`device.invoke` never see anything a
+# hand-run protocol would not also send them.
+name: autofocus-exposure-search
+description: >
+  Maximise the camera's focus score over objective height and exposure time,
+  subject to the frame staying well short of saturation. A real instance of
+  the tradeoff every closed-loop imaging campaign hits: more signal wants more
+  exposure, but too much exposure clips the frame and the measurement itself
+  stops being trustworthy above the saturation limit.
+
+protocol:
+  name: focus-exposure-trial
+  steps:
+    - label: focus
+      device: scope1
+      feature: FocusControl
+      command: move_z
+      args: {z_um: "${z_um}"}
+      reason: "campaign trial: candidate focal height"
+    - label: snap
+      device: scope1
+      feature: Camera
+      command: snap
+      args: {exposure_ms: "${exposure_ms}"}
+      reason: "campaign trial: measure focus at the candidate point"
+
+space:
+  dimensions:
+    - name: z_um
+      type: continuous
+      low: 0.0
+      high: 190.0
+      unit: um
+      description: Objective height above the stage datum.
+    - name: exposure_ms
+      type: continuous
+      low: 5.0
+      high: 200.0
+      unit: ms
+      log: true
+      description: Camera integration time; searched on a log scale because
+        the useful range spans decades, not milliseconds.
+
+objectives:
+  - name: focus
+    path: steps.snap.result.focus_score
+    direction: maximize
+    description: Sharpness of the acquired frame.
+  - name: saturation
+    path: steps.snap.result.saturated_fraction
+    direction: constrain
+    maximum: 0.02
+    description: A saturated frame's focus score cannot be trusted, no matter
+      how high it reads -- so this is a hard limit, not a second thing to
+      trade off against sharpness.
+
+budget: 20
+initial_design: latin_hypercube
+initial_design_size: 6
+seed: 7

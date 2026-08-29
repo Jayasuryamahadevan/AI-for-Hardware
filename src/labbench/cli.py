@@ -11,6 +11,7 @@ experiment is misbehaving, and it should depend on as little as possible.
     labbench ledger     verify|query
     labbench call       --config lab.yaml <method> [key=value ...]
     labbench experiment run --config lab.yaml protocol.yaml [var=value ...]
+    labbench campaign   run --config lab.yaml campaign.yaml
 """
 
 from __future__ import annotations
@@ -441,6 +442,81 @@ async def _experiment_run(args: argparse.Namespace) -> int:
         await gateway.close()
 
 
+# -- campaign ----------------------------------------------------------------
+
+
+async def _campaign_run(args: argparse.Namespace) -> int:
+    """Run a closed-loop campaign to completion, prompting the operator for any approval.
+
+    Same one-shot shape as `_experiment_run`: one Gateway held for the whole
+    campaign, so a trial that needs a human signature is answered right here
+    rather than requiring a second terminal talking to a long-lived server.
+    """
+    from .campaign import CampaignSpec, CampaignStatus
+    from .gateway import Gateway
+
+    try:
+        spec = CampaignSpec.load(args.campaign)
+    except Exception as exc:  # noqa: BLE001 - any failure here becomes a clean operator-facing message
+        raise SystemExit(f"labbench: {args.campaign} is not a valid campaign: {exc}") from None
+
+    gateway = Gateway(_load_config(args.config), data_dir=args.data_dir)
+    await gateway.start()
+    try:
+        problems = spec.validate_against(gateway)
+        if problems:
+            print(f"labbench: {spec.name} has {len(problems)} problem(s):", file=sys.stderr)
+            for problem in problems:
+                print(f"  - {problem}", file=sys.stderr)
+            return 1
+
+        campaign_id = gateway.campaigns.define(spec)
+        state = gateway.campaigns.start(campaign_id, actor="human:cli")
+        print(f"labbench: running {spec.name!r} as {state.id} "
+              f"(budget {spec.budget}, {len(spec.objectives)} objective(s))", file=sys.stderr)
+
+        last_trial = -1
+        while True:
+            current = gateway.campaigns.get(state.id)
+            if current.status.terminal:
+                break
+            if current.status is not CampaignStatus.AWAITING_APPROVAL:
+                # See the matching comment in _experiment_run: every branch must
+                # yield at least once, or campaign.resume()'s background task
+                # never actually gets a turn on this single-threaded event loop.
+                if current.trial != last_trial:
+                    print(f"  trial {current.trial}/{spec.budget}...", file=sys.stderr)
+                    last_trial = current.trial
+                await asyncio.sleep(0.1)
+                continue
+
+            pending_for_run = [
+                p for p in gateway.approvals.pending() if p.run_id == current.current_run_id
+            ]
+            if not pending_for_run:  # pragma: no cover - resolved by a racing caller
+                await asyncio.sleep(0.1)
+                continue
+            pending = pending_for_run[0]
+            print(f"\n{pending.prompt}\n", file=sys.stderr)
+            print("Grant this action? [y/N] ", end="", file=sys.stderr)
+            answer = input().strip().lower()
+            if answer == "y":
+                print("Your name or id: ", end="", file=sys.stderr)
+                approver = input().strip() or "human:cli"
+                await gateway.approvals.grant(pending.id, approver=approver)
+            else:
+                await gateway.approvals.deny(pending.id, approver="human:cli", reason="declined at the CLI")
+            gateway.campaigns.resume(state.id)
+            await asyncio.sleep(0.1)  # let the resumed campaign actually start before re-checking it
+
+        finished = gateway.campaigns.get(state.id)
+        best = gateway.campaigns.best(state.id)
+        _emit({"campaign": finished.summary(), "best": best})
+        return 0 if finished.status is CampaignStatus.SUCCEEDED else 1
+    finally:
+        await gateway.close()
+
+
 # -- argument parsing ------------------------------------------------------
 
 
@@ -527,6 +603,15 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("protocol", help="Path to a protocol YAML file.")
     run.add_argument("var", nargs="*", help="key=value overrides for the protocol's variables.")
     run.set_defaults(func=_experiment_run)
+
+    campaign = sub.add_parser("campaign", parents=[common], help="Run a closed-loop campaign.")
+    campaign_sub = campaign.add_subparsers(dest="campaign_command", required=True)
+    campaign_run = campaign_sub.add_parser(
+        "run", parents=[common], help="Run a campaign to completion."
+    )
+    campaign_run.add_argument("-c", "--config", required=True)
+    campaign_run.add_argument("campaign", help="Path to a campaign YAML file.")
+    campaign_run.set_defaults(func=_campaign_run)
 
     return parser
 

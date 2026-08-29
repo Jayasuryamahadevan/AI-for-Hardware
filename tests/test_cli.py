@@ -207,3 +207,80 @@ steps:
         assert result.returncode == 1
         payload = json.loads(result.stdout)
         assert payload["status"] == "failed"
+
+
+class TestCampaignRun:
+    CAMPAIGN = """
+name: focus-search
+protocol:
+  name: focus-trial
+  steps:
+    - label: focus
+      device: scope1
+      feature: FocusControl
+      command: move_z
+      args: {z_um: "${z_um}"}
+    - label: snap
+      device: scope1
+      feature: Camera
+      command: snap
+      args: {exposure_ms: "${exposure_ms}"}
+space:
+  dimensions:
+    - {name: z_um, low: 0.0, high: 190.0, unit: um}
+    - {name: exposure_ms, low: 5.0, high: 200.0, unit: ms, log: true}
+objectives:
+  - {name: focus, path: steps.snap.result.focus_score, direction: maximize}
+budget: 4
+initial_design_size: 2
+seed: 3
+"""
+
+    def test_successful_run(self, data_dir, tmp_path):
+        campaign_path = tmp_path / "campaign.yaml"
+        campaign_path.write_text(self.CAMPAIGN)
+        result = run_cli(
+            "campaign", "run", "-c", str(CONFIG), str(campaign_path), data_dir=data_dir,
+        )
+        assert result.returncode == 0, result.stderr
+        payload = json.loads(result.stdout)
+        assert payload["campaign"]["status"] == "succeeded"
+        assert payload["campaign"]["trial"] == 4
+        assert len(payload["campaign"]["observations"]) == 4
+        assert payload["best"]["best_trial"] is not None
+
+    def test_invalid_campaign_is_reported_without_running_anything(self, data_dir, tmp_path):
+        campaign_path = tmp_path / "bad.yaml"
+        campaign_path.write_text(
+            "name: bad\n"
+            "protocol:\n  name: x\n  steps:\n"
+            "    - {device: no_such_device, feature: F, command: c}\n"
+            "space:\n  dimensions:\n    - {name: z_um, low: 0.0, high: 1.0}\n"
+            "objectives:\n  - {name: focus, path: steps.a.result.x, direction: maximize}\n"
+        )
+        result = run_cli(
+            "campaign", "run", "-c", str(CONFIG), str(campaign_path), data_dir=data_dir,
+        )
+        assert result.returncode == 1
+        assert "no_such_device" in result.stderr
+
+    def test_approval_required_trial_prompts_and_honours_a_grant(self, data_dir, tmp_path):
+        campaign_path = tmp_path / "gas.yaml"
+        campaign_path.write_text(
+            "name: gas-sweep\n"
+            "protocol:\n  name: gas-trial\n  steps:\n"
+            "    - {label: set_gas, device: incubator1, feature: GasControl, command: set_co2, "
+            "args: {co2_pct: \"${co2_pct}\"}}\n"
+            "space:\n  dimensions:\n    - {name: co2_pct, low: 3.0, high: 8.0}\n"
+            "objectives:\n  - {name: co2, path: steps.set_gas.result.co2_pct, direction: maximize}\n"
+            "budget: 1\ninitial_design_size: 1\n"
+        )
+        result = run_cli(
+            "campaign", "run", "-c", str(CONFIG), str(campaign_path),
+            data_dir=data_dir, input_text="y\nhuman:test\n",
+        )
+        assert result.returncode == 0, result.stderr
+        assert "APPROVAL REQUIRED" in result.stderr
+        payload = json.loads(result.stdout)
+        assert payload["campaign"]["status"] == "succeeded"
+        assert payload["campaign"]["trial"] == 1
