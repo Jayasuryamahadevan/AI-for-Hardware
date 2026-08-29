@@ -1,5 +1,7 @@
 # LabBench
 
+[![CI](https://github.com/Jayasuryamahadevan/Open_Model_Hardware_Standard/actions/workflows/ci.yml/badge.svg)](https://github.com/Jayasuryamahadevan/Open_Model_Hardware_Standard/actions/workflows/ci.yml)
+
 **A USB cable for laboratory hardware.** Plug any AI model into any supported instrument.
 
 <p align="center">

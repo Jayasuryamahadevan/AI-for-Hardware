@@ -1,0 +1,44 @@
+# Runs exactly what the README's "Developing" section tells a contributor to
+# run locally -- uv sync, ruff, pytest -- so this file has no behaviour of its
+# own to drift out of sync with the docs. Every driver test already skips
+# itself cleanly when its optional dependency or real device adapter isn't
+# present (see tests/test_driver_*.py's own pytest.importorskip/skipif calls),
+# the same "a lab with no hardware attached still starts" rule the gateway
+# itself follows -- so CI needs no per-driver special-casing to stay green on
+# a runner with no real instruments attached.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: "pyproject.toml"
+
+      - name: Install Python
+        run: uv python install 3.11
+
+      - name: Sync dependencies
+        run: uv sync --extra dev --extra all
+
+      - name: Lint
+        run: uv run ruff check src tests examples
+
+      - name: Test
+        run: uv run pytest --verbose
