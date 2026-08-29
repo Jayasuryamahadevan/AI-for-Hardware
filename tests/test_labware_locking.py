@@ -102,6 +102,44 @@ class TestPlateStoreHold:
         plate = _labware.BENCH.get("RACE1")
         assert plate.location in ("incubator1", "reader1")
 
+    async def test_dispensing_into_a_plate_thats_off_deck_is_refused(self, gateway):
+        """The physical fact a liquid handler cannot reach a plate that is
+        currently loaded in a reader or stored in an incubator -- previously
+        unchecked at runtime, unlike the equivalent check load_plate and
+        store_plate already made of themselves."""
+        await gateway.invoke(
+            "handler1", "Labware", "create_plate", {"barcode": "DECK1"}, actor="test",
+        )
+        await gateway.invoke(
+            "reader1", "PlateTransport", "load_plate", {"barcode": "DECK1"}, actor="test",
+        )
+        await gateway.invoke("handler1", "TipManagement", "pick_up_tips", {}, actor="test")
+        await gateway.invoke(
+            "handler1", "Pipette", "aspirate",
+            {"trough": "water", "volume_ul": 20.0}, actor="test",
+        )
+        with pytest.raises(LabBenchError, match="not on the deck"):
+            await gateway.invoke(
+                "handler1", "Pipette", "dispense",
+                {"plate": "DECK1", "well": "A1", "volume_ul": 20.0}, actor="test",
+            )
+
+    async def test_store_plate_simulation_matches_its_own_runtime_check(self, gateway):
+        """incubator._simulate's store_plate branch used to skip the location
+        check its own runtime handler enforces, so device.simulate could
+        report a plate-swap as feasible when the real call would refuse it."""
+        await gateway.invoke(
+            "handler1", "Labware", "create_plate", {"barcode": "SIM1"}, actor="test",
+        )
+        await gateway.invoke(
+            "reader1", "PlateTransport", "load_plate", {"barcode": "SIM1"}, actor="test",
+        )
+        result = await gateway.device("incubator1").simulate(
+            "PlateStorage", "store_plate", {"barcode": "SIM1"},
+        )
+        assert not result.feasible
+        assert any("SIM1" in v for v in result.violations)
+
     async def test_mutation_inside_hold_is_not_torn_by_a_concurrent_holder(self):
         """The realistic check: two 'devices' each add volume to the same
         well through `hold`; the total must be exactly the sum of both,

@@ -319,6 +319,19 @@ class SimulatedLiquidHandler(Device):
         except KeyError as exc:
             raise ConstraintViolation(str(exc), barcode=barcode) from None
 
+    def _require_on_deck(self, plate: _labware.Plate) -> None:
+        """This handler never claims custody of a plate (`location` is only
+        ever "bench" or another instrument's id for a plate the deck can
+        actually reach) -- a plate loaded in a reader or stored in an
+        incubator is physically out of the pipette's reach, the same
+        constraint `load_plate`/`store_plate` already enforce for
+        themselves."""
+        if plate.location != "bench":
+            raise ConstraintViolation(
+                f"plate {plate.barcode!r} is at {plate.location!r}, not on the deck",
+                barcode=plate.barcode, location=plate.location,
+            )
+
     def _delivered(self, requested_ul: float) -> float:
         """Actual volume for a requested one.
 
@@ -389,6 +402,7 @@ class SimulatedLiquidHandler(Device):
             )
         self._plate(plate)  # translates an unknown barcode before taking the lock
         async with _labware.BENCH.hold(plate) as target:
+            self._require_on_deck(target)
             try:
                 source = target.well(well)
             except ValueError as exc:
@@ -419,6 +433,7 @@ class SimulatedLiquidHandler(Device):
     ) -> dict[str, Any]:
         self._plate(plate)  # translates an unknown barcode before taking the lock
         async with _labware.BENCH.hold(plate) as target:
+            self._require_on_deck(target)
             try:
                 destination = target.well(well)
             except ValueError as exc:
@@ -531,6 +546,7 @@ class SimulatedLiquidHandler(Device):
         # this command has been mixing, not one another device touched
         # mid-cycle.
         async with _labware.BENCH.hold(plate) as target:
+            self._require_on_deck(target)
             try:
                 destination = target.well(well)
             except ValueError as exc:
@@ -579,6 +595,7 @@ class SimulatedLiquidHandler(Device):
         if command == "dispense":
             try:
                 plate = self._plate(args.get("plate", ""))
+                self._require_on_deck(plate)
                 well = plate.well(args.get("well", "A1"))
             except (ConstraintViolation, ValueError) as exc:
                 return SimulationResult(feasible=False, fidelity="kinematic",

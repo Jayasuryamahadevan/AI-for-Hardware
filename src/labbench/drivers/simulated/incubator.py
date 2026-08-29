@@ -509,9 +509,17 @@ class SimulatedIncubator(Device):
                 violations.append(f"all {self.slots} slots are occupied")
             barcode = args.get("barcode", "")
             try:
-                _labware.BENCH.get(barcode)
+                plate = _labware.BENCH.get(barcode)
             except KeyError as exc:
                 violations.append(str(exc))
+            else:
+                # Matches the check `_cmd_store_plate` actually enforces at
+                # runtime -- a plate already loaded in a reader, or in
+                # another incubator, cannot also be feasible to store here.
+                if plate.location not in ("bench", self.id):
+                    violations.append(
+                        f"plate {barcode!r} is at {plate.location!r}, not on the bench"
+                    )
             warnings = []
             if not self.at_setpoint:
                 warnings.append(
