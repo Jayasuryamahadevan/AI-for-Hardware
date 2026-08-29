@@ -34,6 +34,23 @@ class TestRequestAndGrant:
         with pytest.raises(ApprovalDenied):
             await broker.grant(req.id, approver="agent:main")
 
+    async def test_authenticated_identity_defeats_a_spoofed_approver_name(self, broker):
+        """A free-text `approver` that merely differs from the requester's
+        `actor` proves nothing once identity is credential-backed (see
+        protocol/auth.py) -- an agent could type any name it likes. The
+        check that actually matters compares the *authenticated* caller
+        (`granter_actor`) to who raised the request."""
+        req = await broker.request(device="d", feature="F", command="c", args={}, actor="agent:main")
+        with pytest.raises(ApprovalDenied):
+            await broker.grant(
+                req.id, approver="human:not-actually-alice", granter_actor="agent:main",
+            )
+
+    async def test_authenticated_identity_allows_a_genuinely_different_caller(self, broker):
+        req = await broker.request(device="d", feature="F", command="c", args={}, actor="agent:main")
+        granted = await broker.grant(req.id, approver="human:alice", granter_actor="human:alice")
+        assert granted.state is ApprovalState.GRANTED
+
     async def test_anonymous_approver_rejected(self, broker):
         req = await broker.request(device="d", feature="F", command="c", args={})
         with pytest.raises(ApprovalDenied):

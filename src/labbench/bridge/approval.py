@@ -225,12 +225,21 @@ class ApprovalBroker:
     # -- answering --------------------------------------------------------
 
     async def grant(
-        self, approval_id: str, *, approver: str, reason: str = ""
+        self, approval_id: str, *, approver: str, granter_actor: str | None = None,
+        reason: str = "",
     ) -> ApprovalRequest:
         """Sign off on a pending request.
 
-        `approver` must name a person. An agent signing its own request would
-        make the whole gate decorative, so that case is refused outright.
+        `approver` must name a person, and is what the ledger displays as who
+        signed. The self-approval check it backs is a different question:
+        *who actually called this*. `granter_actor` -- the authenticated
+        identity behind the call (see `protocol/auth.py`) -- decides that
+        when a caller has one; comparing `approver` to the request's `actor`
+        would only compare two strings the same caller can type however it
+        likes, which is not a check at all. Callers with no authenticated
+        identity concept (the CLI's own interactive prompt, an in-process
+        test) fall back to the free-text comparison, matching the trust
+        boundary they already sit inside.
         """
         req = self._require_pending(approval_id)
         if not approver or approver.strip().lower() in ("", "agent", "unknown"):
@@ -239,7 +248,10 @@ class ApprovalBroker:
                 "pass approver='<name or id>'",
                 approval_id=approval_id,
             )
-        if approver == req.actor:
+        self_approval = (
+            granter_actor == req.actor if granter_actor is not None else approver == req.actor
+        )
+        if self_approval:
             raise ApprovalDenied(
                 f"{approver!r} raised this request and may not also approve it",
                 approval_id=approval_id, actor=req.actor,

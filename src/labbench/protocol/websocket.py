@@ -26,6 +26,7 @@ import struct
 import time
 from typing import Any
 
+from .auth import Identity
 from .jsonrpc import INTERNAL_ERROR, JsonRpcError, Response, parse_message, serialise
 from .router import Router, RpcContext
 
@@ -263,8 +264,14 @@ class WebSocketEndpoint:
         request: Any,  # protocol.http.HttpRequest; untyped to avoid a cycle
         reader: asyncio.StreamReader,
         writer: asyncio.StreamWriter,
+        identity: Identity | None = None,
     ) -> None:
-        """Complete the handshake, then serve the connection until it closes."""
+        """Complete the handshake, then serve the connection until it closes.
+
+        `identity` is already verified by `HttpServer` before this is ever
+        called -- see `protocol/auth.py`. It is not this method's job to
+        authenticate the connection, only to trust the actor it was handed.
+        """
         key = request.header("sec-websocket-key")
         version = request.header("sec-websocket-version")
         if not key:
@@ -289,8 +296,11 @@ class WebSocketEndpoint:
 
         conn = WebSocketConnection(reader, writer, peer=request.peer)
         self.connections.add(conn)
+        actor = identity.actor if identity is not None else request.header(
+            "x-labbench-actor", "agent:websocket"
+        )
         ctx = RpcContext(
-            actor=request.header("x-labbench-actor", "agent:websocket"),
+            actor=actor,
             session_id=request.header("x-labbench-session", conn.id),
             transport="websocket",
             peer=request.peer,

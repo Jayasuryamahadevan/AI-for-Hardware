@@ -34,6 +34,7 @@ import urllib.parse
 from collections.abc import Awaitable, Callable
 from typing import Any
 
+from .auth import Authenticator, Credential, Identity
 from .jsonrpc import INTERNAL_ERROR, JsonRpcError, Response, parse_message, serialise
 from .router import Router, RpcContext
 
@@ -138,7 +139,7 @@ class HttpResponse:
         return ("\r\n".join(lines) + "\r\n\r\n").encode("ascii") + self.body
 
 
-Handler = Callable[[HttpRequest], Awaitable[HttpResponse]]
+Handler = Callable[[HttpRequest, "Identity | None"], Awaitable[HttpResponse]]
 
 
 class EventStream:
@@ -206,6 +207,7 @@ class HttpServer:
         host: str = "127.0.0.1",
         port: int = 8765,
         token: str | None = None,
+        credentials: list[Credential] | None = None,
         allow_origin: str = "*",
         server_name: str = "labbench",
     ) -> None:
@@ -213,12 +215,15 @@ class HttpServer:
         self.host = host
         self.port = port
         self.token = token
+        self.auth = Authenticator(credentials=credentials, legacy_token=token)
         self.allow_origin = allow_origin
         self.server_name = server_name
         self.routes: dict[tuple[str, str], Handler] = {}
         self.subscribers: set[EventStream] = set()
         self._server: asyncio.Server | None = None
-        self._upgrade_handler: Callable[..., Awaitable[None]] | None = None
+        #: Called for every upgrade request, authenticated the same as any
+        #: other connection -- see the module docstring in `.auth`.
+        self._upgrade_handler: Callable[[HttpRequest, Any, Any, Identity | None], Awaitable[None]] | None = None
         self._register_builtin_routes()
 
     # -- registration -----------------------------------------------------
@@ -255,16 +260,16 @@ class HttpServer:
 
     async def start(self) -> None:
         loopback = self.host in ("127.0.0.1", "::1", "localhost")
-        if not loopback and not self.token:
+        if not loopback and not self.auth.required:
             raise RuntimeError(
                 f"refusing to bind {self.host}:{self.port} without an auth token. "
                 "A gateway reachable off-host controls physical hardware; set a token "
-                "(--token / LABBENCH_TOKEN) or bind to 127.0.0.1."
+                "(--token / LABBENCH_TOKEN), configure named credentials, or bind to 127.0.0.1."
             )
         self._server = await asyncio.start_server(self._on_connection, self.host, self.port)
         log.info(
             "listening on http://%s:%d (auth: %s)",
-            self.host, self.port, "token" if self.token else "none - loopback only",
+            self.host, self.port, "token" if self.auth.required else "none - loopback only",
         )
 
     async def serve_forever(self) -> None:
@@ -310,8 +315,21 @@ class HttpServer:
                     return
 
                 if request.wants_upgrade and self._upgrade_handler is not None:
+                    # Authenticated exactly like any other request -- an
+                    # upgrade used to skip this entirely, which meant a
+                    # configured --token protected /rpc and /events but not
+                    # ws://. See the module docstring in `.auth`.
+                    identity = self._authenticate(request)
+                    if self.auth.required and identity is None:
+                        writer.write(HttpResponse(
+                            401,
+                            serialise({"error": "Unauthorized", "message": "bearer token required"}),
+                            headers={"WWW-Authenticate": 'Bearer realm="labbench"'},
+                        ).render(keep_alive=False))
+                        await writer.drain()
+                        return
                     # Hand the socket over; it is no longer an HTTP connection.
-                    await self._upgrade_handler(request, reader, writer)
+                    await self._upgrade_handler(request, reader, writer, identity)
                     return
 
                 keep_alive = self._should_keep_alive(request)
@@ -353,16 +371,13 @@ class HttpServer:
             "Vary": "Origin",
         }
 
-    def _authorised(self, request: HttpRequest) -> bool:
-        if not self.token:
-            return True
+    def _authenticate(self, request: HttpRequest) -> Identity | None:
         header = request.header("authorization")
         prefix = "bearer "
-        if not header.lower().startswith(prefix):
-            return False
-        # Constant-time: a token check that leaks length or prefix by timing is
-        # a token check an attacker can walk.
-        return secrets.compare_digest(header[len(prefix):].strip(), self.token)
+        bearer = header[len(prefix):].strip() if header.lower().startswith(prefix) else None
+        return self.auth.authenticate(
+            bearer, claimed_actor=request.header("x-labbench-actor", "")
+        )
 
     async def _handle(
         self, request: HttpRequest, writer: asyncio.StreamWriter
@@ -380,7 +395,8 @@ class HttpServer:
                 404, f"no route {request.method} {request.path}; "
                      f"try {', '.join(sorted({p for _, p in self.routes}))}"
             )
-        if request.path != "/healthz" and not self._authorised(request):
+        identity = self._authenticate(request)
+        if request.path != "/healthz" and self.auth.required and identity is None:
             return HttpResponse(
                 401,
                 serialise({"error": "Unauthorized", "message": "bearer token required"}),
@@ -390,13 +406,13 @@ class HttpServer:
         if request.path == "/events" and request.method == "GET":
             await self._serve_events(request, writer)
             return None
-        return await handler(request)
+        return await handler(request, identity)
 
     # -- built-in routes --------------------------------------------------
 
     def _register_builtin_routes(self) -> None:
         @self.route("POST", "/rpc")
-        async def rpc(request: HttpRequest) -> HttpResponse:
+        async def rpc(request: HttpRequest, identity: Identity | None) -> HttpResponse:
             """JSON-RPC 2.0 over HTTP."""
             # Content-Type is deliberately not enforced. The point of this
             # transport is that a model with an HTTP client and nothing else
@@ -408,8 +424,12 @@ class HttpServer:
             except JsonRpcError as exc:
                 return HttpResponse.json(Response.fail(None, exc).to_dict(), 200)
 
+            # The actor comes from the verified identity whenever one exists --
+            # only an unauthenticated dev bench (no token, no credentials)
+            # falls back to trusting the caller's own header. See `.auth`.
+            actor = identity.actor if identity is not None else request.header("x-labbench-actor", "agent:http")
             ctx = RpcContext(
-                actor=request.header("x-labbench-actor", "agent:http"),
+                actor=actor,
                 session_id=request.header("x-labbench-session", ""),
                 transport="http",
                 peer=request.peer,
@@ -438,14 +458,14 @@ class HttpServer:
             return HttpResponse.json(payload)
 
         @self.route("GET", "/healthz")
-        async def healthz(request: HttpRequest) -> HttpResponse:
+        async def healthz(request: HttpRequest, identity: Identity | None) -> HttpResponse:
             """Liveness. Unauthenticated on purpose, so a probe needs no secret."""
             return HttpResponse.json(
                 {"status": "ok", "service": self.server_name, "subscribers": len(self.subscribers)}
             )
 
         @self.route("GET", "/methods")
-        async def methods(request: HttpRequest) -> HttpResponse:
+        async def methods(request: HttpRequest, identity: Identity | None) -> HttpResponse:
             """Every JSON-RPC method this gateway exposes, with its summary."""
             return HttpResponse.json({"methods": self.router.methods})
 
@@ -490,7 +510,9 @@ class HttpServer:
             self.subscribers.discard(stream)
 
 
-async def _sse_placeholder(request: HttpRequest) -> HttpResponse:  # pragma: no cover
+async def _sse_placeholder(
+    request: HttpRequest, identity: Identity | None
+) -> HttpResponse:  # pragma: no cover
     return HttpResponse.error(500, "event stream not wired")
 
 

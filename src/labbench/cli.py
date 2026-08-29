@@ -101,10 +101,13 @@ async def _serve(args: argparse.Namespace) -> int:
     tasks: list[asyncio.Task[Any]] = []
 
     if "http" in transports or "ws" in transports:
+        from .protocol.auth import Credential
+
         token = args.token or os.environ.get("LABBENCH_TOKEN")
+        credentials = [Credential.model_validate(c) for c in config.credentials]
         http_server = HttpServer(
             gateway.router, host=args.host, port=args.port, token=token,
-            server_name=f"labbench/{__version__}",
+            credentials=credentials, server_name=f"labbench/{__version__}",
         )
         if "ws" in transports:
             endpoint = WebSocketEndpoint(gateway.router)
@@ -117,7 +120,8 @@ async def _serve(args: argparse.Namespace) -> int:
             f"  POST {http_server.url}/rpc      JSON-RPC 2.0\n"
             f"  GET  {http_server.url}/events   live event stream (SSE)\n"
             f"  GET  {http_server.url}/healthz  liveness\n"
-            f"  auth: {'bearer token' if token else 'none (loopback only)'}",
+            f"  auth: {'bearer token' if http_server.auth.required else 'none (loopback only)'}"
+            + (f", {len(credentials)} named credential(s)" if credentials else ""),
             file=sys.stderr,
         )
         tasks.append(asyncio.create_task(http_server.serve_forever()))

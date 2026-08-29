@@ -52,6 +52,12 @@ class LabConfig(BaseModel):
     #: Raw safety policy; parsed by labbench.core.safety.SafetyPolicy.
     safety: dict[str, Any] = Field(default_factory=dict)
     memory: list[dict[str, Any]] = Field(default_factory=list)
+    #: Named identities for the HTTP/WebSocket transports, parsed by
+    #: labbench.protocol.auth.Credential. Superset of the legacy --token flag:
+    #: once any are configured, the actor written to the ledger is always the
+    #: matched credential's, never a caller-supplied header. See
+    #: protocol/auth.py for why that distinction is load-bearing.
+    credentials: list[dict[str, Any]] = Field(default_factory=list)
     data_dir: str = "./labbench-data"
 
     @classmethod

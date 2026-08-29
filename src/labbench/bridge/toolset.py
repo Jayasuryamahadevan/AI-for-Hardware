@@ -337,15 +337,18 @@ def register_tools(router: Router, gateway: Any) -> None:
 
     @router.method("approval.grant")
     async def approval_grant(
-        approval_id: str, approver: str, reason: str = ""
+        approval_id: str, approver: str, reason: str = "", ctx: RpcContext = None,
     ) -> dict[str, Any]:
         """Sign off on a pending action. For humans, not agents.
 
         `approver` must identify a person. The grant is bound to the exact
         arguments that were shown, so it cannot be spent on a different call.
+        Self-approval is refused by the *authenticated* caller identity, not
+        by the `approver` name alone -- see `ApprovalBroker.grant`.
         """
         request = await gateway.approvals.grant(
-            approval_id, approver=approver, reason=reason
+            approval_id, approver=approver,
+            granter_actor=ctx.actor if ctx else None, reason=reason,
         )
         return request.summary() | {
             "next_step": f"retry the original call passing approval_id={approval_id!r}"

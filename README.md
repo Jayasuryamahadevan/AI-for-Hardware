@@ -51,7 +51,7 @@ updated as each layer lands.
 | `campaign/` | Closed-loop autonomous experimentation: search space, objectives, GP-EI planner, runner | ✅ complete |
 | `evals/` | Scored agent evals: 6 tasks (capability/safety/recovery), graded mechanically, any dialect | ✅ complete |
 | `cli.py` | `serve` · `doctor` · `devices` · `tools` · `ledger` · `call` · `experiment run` · `campaign run` · `eval run` | ✅ complete |
-| `tests/` | 471 tests: unit, real-protocol integration, CLI, and a driver×dialect conformance matrix | ✅ complete |
+| `tests/` | 478 tests: unit, real-protocol integration, CLI, and a driver×dialect conformance matrix | ✅ complete |
 | `examples/` | A working agent loop per dialect (Claude, GPT, Gemini, zero-SDK generic) | ✅ complete |
 
 ---
@@ -168,6 +168,30 @@ hash-chained ledger before and after execution — SQLite for queries, mirrored
 JSONL for the auditor who has none of this software. Any retroactive edit is
 detectable by re-walking the chain. That is what GxP audit-trail rules and
 ALCOA+ ask for, and what a reproducibility claim needs regardless of regulation.
+
+**Attribution is a verified identity, not a header the caller wrote.** A
+ledger that can be told who to blame is not an audit trail. Every credential
+in `credentials:` binds one bearer token to one fixed actor server-side; the
+actor recorded against every ledger entry, and the one the approval broker
+checks to refuse an agent signing its own request, is whichever credential's
+token authenticated the call — never a value read from a request header. The
+legacy single `--token`/`LABBENCH_TOKEN` flag still works for the
+single-operator dev case it was always for (one shared secret, a
+self-declared actor), and is superseded the moment any `credentials` are
+configured:
+
+```yaml
+credentials:
+  - token: "sk-agent-…"      # set via an env var or secret store, not committed
+    actor: "agent:campaign-runner"
+  - token: "sk-alice-…"
+    actor: "human:alice"
+```
+
+Both the HTTP and WebSocket transports authenticate every connection this way,
+upgrade requests included — a `ws://` connection used to skip the check
+`/rpc` already enforced, so a configured token protected one transport and not
+the other.
 
 ---
 
@@ -437,7 +461,7 @@ labbench ledger verify
 
 ```bash
 uv sync --extra dev --extra all   # gateway + every optional instrument library + pytest/ruff
-uv run pytest                     # 471 tests: unit, conformance, real-protocol integration, CLI
+uv run pytest                     # 478 tests: unit, conformance, real-protocol integration, CLI
 uv run ruff check src tests examples
 ```
 

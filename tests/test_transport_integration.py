@@ -30,6 +30,10 @@ def make_router() -> Router:
         await ctx.progress(0.5, "halfway")
         return {"done": True}
 
+    @router.method("whoami")
+    async def whoami(ctx: RpcContext) -> dict:
+        return {"actor": ctx.actor}
+
     return router
 
 
@@ -104,6 +108,45 @@ class TestHttp:
         finally:
             await http_server.close()
 
+    async def test_credential_actor_overrides_any_claimed_header(self):
+        """A caller holding a credential's token cannot make the ledger
+        believe it is someone else by setting X-LabBench-Actor -- the actor
+        is whichever credential's token matched, full stop."""
+        from labbench.protocol.auth import Credential
+
+        router = make_router()
+        http_server = HttpServer(
+            router, host="127.0.0.1", port=18768,
+            credentials=[Credential(token="alice-token", actor="human:alice")],
+        )
+        await http_server.start()
+        try:
+            client = HttpClient(
+                f"http://127.0.0.1:{http_server.port}",
+                token="alice-token", actor="human:spoofed",
+            )
+            result = await client.call("whoami")
+            assert result == {"actor": "human:alice"}
+        finally:
+            await http_server.close()
+
+    async def test_a_token_that_matches_no_credential_is_unauthorised(self):
+        from labbench.protocol.auth import Credential
+        from labbench.protocol.client import ClientError
+
+        router = make_router()
+        http_server = HttpServer(
+            router, host="127.0.0.1", port=18773,
+            credentials=[Credential(token="alice-token", actor="human:alice")],
+        )
+        await http_server.start()
+        try:
+            client = HttpClient(f"http://127.0.0.1:{http_server.port}", token="not-alices-token")
+            with pytest.raises(ClientError, match="unauthorised"):
+                await client.call("whoami")
+        finally:
+            await http_server.close()
+
 
 class TestWebSocket:
     async def test_rpc_call_over_ws(self, server):
@@ -144,3 +187,64 @@ class TestWebSocket:
             assert payload == {"hello": "world"}
         finally:
             await client.close()
+
+    async def test_unauthorised_without_a_token(self):
+        """The upgrade path used to skip authentication entirely -- a
+        --token that protected /rpc did nothing for ws://. This is the
+        regression test for that: an upgrade with no token, against a
+        server that requires one, must be refused before the handshake
+        completes, exactly like the HTTP transport already is."""
+        from labbench.protocol.client import ClientError
+
+        router = make_router()
+        http_server = HttpServer(router, host="127.0.0.1", port=18769, token="secret")
+        endpoint = WebSocketEndpoint(router)
+        http_server.set_upgrade_handler(endpoint.handle_upgrade)
+        await http_server.start()
+        try:
+            with pytest.raises(ClientError, match="upgrade refused"):
+                await WebSocketClient(f"ws://127.0.0.1:{http_server.port}/ws").connect()
+        finally:
+            await http_server.close()
+
+    async def test_authorised_with_the_right_token(self):
+        router = make_router()
+        http_server = HttpServer(router, host="127.0.0.1", port=18770, token="secret")
+        endpoint = WebSocketEndpoint(router)
+        http_server.set_upgrade_handler(endpoint.handle_upgrade)
+        await http_server.start()
+        try:
+            client = await WebSocketClient(
+                f"ws://127.0.0.1:{http_server.port}/ws", token="secret",
+            ).connect()
+            try:
+                result = await client.call("echo", value=3)
+                assert result == {"value": 3}
+            finally:
+                await client.close()
+        finally:
+            await http_server.close()
+
+    async def test_credential_actor_overrides_any_claimed_header(self):
+        from labbench.protocol.auth import Credential
+
+        router = make_router()
+        http_server = HttpServer(
+            router, host="127.0.0.1", port=18771,
+            credentials=[Credential(token="alice-token", actor="human:alice")],
+        )
+        endpoint = WebSocketEndpoint(router)
+        http_server.set_upgrade_handler(endpoint.handle_upgrade)
+        await http_server.start()
+        try:
+            client = await WebSocketClient(
+                f"ws://127.0.0.1:{http_server.port}/ws",
+                token="alice-token", actor="human:spoofed",
+            ).connect()
+            try:
+                result = await client.call("whoami")
+                assert result == {"actor": "human:alice"}
+            finally:
+                await client.close()
+        finally:
+            await http_server.close()
