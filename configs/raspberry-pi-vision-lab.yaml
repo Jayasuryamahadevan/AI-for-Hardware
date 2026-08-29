@@ -1,0 +1,57 @@
+# A real Raspberry Pi (4 or 5) with a camera and a Coral Edge TPU, reached as
+# a W3C Web of Things Thing -- see examples/hardware/raspberry_pi/. Nothing in
+# src/labbench/ was written for this device specifically: the `wot` driver
+# already existed, and this config is the only new thing a real instrument
+# needed.
+#
+# Before pointing this at your Pi:
+#   1. Run examples/hardware/raspberry_pi/pi_vision_thing.py on the Pi.
+#   2. Replace the IP below with the address it prints on startup.
+#   3. This is real hardware -- autonomy and approve_irreversible below are
+#      deliberately more conservative than configs/simulated-lab.yaml.
+name: pi-vision-bench
+description: >
+  A Raspberry Pi vision station: an onboard camera and a Coral Edge TPU,
+  exposed as one WoT Thing. Capture a frame, classify it on-device, and read
+  back system telemetry -- all through the same device.invoke surface a
+  simulated microscope's Camera feature uses.
+
+data_dir: ./labbench-data
+
+devices:
+  - id: pi1
+    driver: wot
+    display_name: Pi Vision Station
+    kind: vision_station
+    vendor: Raspberry Pi Foundation
+    model: "Raspberry Pi 5 + Coral USB Accelerator"
+    location: bench-1
+    settings:
+      # The IP pi_vision_thing.py prints when it starts, not a hostname --
+      # mDNS resolution isn't part of what the wot driver does today.
+      td_url: "http://192.168.1.50:8080/.well-known/wot-thing-description"
+      profile_overrides:
+        actions:
+          # A still capture and an on-device classification are both pure
+          # sensing: nothing about the physical world changes. That is a
+          # genuine fact about this instrument, not a simplifying assumption
+          # the way it is for the simulated microscope, whose Camera.snap is
+          # deliberately Hazard.SAMPLE because illumination really does
+          # bleach a real specimen there.
+          snap:
+            hazard: none
+            reversibility: reversible
+          classify:
+            hazard: none
+            reversibility: reversible
+
+safety:
+  # HUMAN_ON_LOOP, not BOUNDED: this is real hardware with a real camera
+  # capturing whatever it is pointed at, and there is no digital twin behind
+  # it the way there is for the simulated lab -- autonomy is set one notch
+  # more conservative on purpose. Raise it once you have watched it run.
+  autonomy: 2
+  # Left at the default (true). Nothing here is irreversible, so this has no
+  # practical effect yet, but it is the right default for real hardware
+  # regardless of what today's two actions happen to need.
+  approve_irreversible: true

@@ -51,8 +51,9 @@ updated as each layer lands.
 | `campaign/` | Closed-loop autonomous experimentation: search space, objectives, GP-EI planner, runner | ✅ complete |
 | `evals/` | Scored agent evals: 6 tasks (capability/safety/recovery), graded mechanically, any dialect | ✅ complete |
 | `cli.py` | `serve` · `doctor` · `devices` · `tools` · `ledger` · `call` · `experiment run` · `campaign run` · `eval run` | ✅ complete |
-| `tests/` | 478 tests: unit, real-protocol integration, CLI, and a driver×dialect conformance matrix | ✅ complete |
+| `tests/` | 488 tests: unit, real-protocol integration, CLI, and a driver×dialect conformance matrix | ✅ complete |
 | `examples/` | A working agent loop per dialect (Claude, GPT, Gemini, zero-SDK generic) | ✅ complete |
+| `examples/hardware/` | Real (non-simulated) hardware: a Raspberry Pi + camera + Coral Edge TPU as a WoT Thing | ✅ complete |
 
 ---
 
@@ -455,13 +456,22 @@ labbench ledger query
 labbench ledger verify
 ```
 
+Everything above is the simulated lab. `examples/hardware/raspberry_pi/`
+points the exact same CLI at a real Raspberry Pi with a camera and a Coral
+Edge TPU — no new driver code, since the `wot` driver already exists:
+
+```bash
+labbench call -c configs/raspberry-pi-vision-lab.yaml device.invoke \
+  device=pi1 feature=Thing command=classify args='{"top_k": 3}' reason="what's on the bench"
+```
+
 ---
 
 ## Developing
 
 ```bash
 uv sync --extra dev --extra all   # gateway + every optional instrument library + pytest/ruff
-uv run pytest                     # 478 tests: unit, conformance, real-protocol integration, CLI
+uv run pytest                     # 488 tests: unit, conformance, real-protocol integration, CLI
 uv run ruff check src tests examples
 ```
 
