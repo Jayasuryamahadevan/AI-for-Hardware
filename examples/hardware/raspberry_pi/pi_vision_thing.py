@@ -10,11 +10,21 @@ these, not touching the gateway. This script IS the instrument's side of that
 contract, and nothing else has to know it exists until you point a lab
 config at its URL.
 
-Prerequisites (Raspberry Pi OS Bookworm, Pi 4 or 5):
+Prerequisites (Raspberry Pi OS Bookworm, Pi 4 or 5, or any Linux x86_64/aarch64
+box with a Coral USB Accelerator -- this script does not require picamera2 or
+a Pi specifically for the Edge TPU half of it):
 
-    sudo apt install -y python3-picamera2 python3-pycoral
-    # or, in a venv with --system-site-packages so picamera2 sees libcamera:
-    pip install pycoral
+    sudo apt install -y python3-picamera2         # camera; Pi only
+    pip install tflite-runtime                    # or: sudo apt install python3-tflite-runtime
+
+    # The native Edge TPU runtime -- not a Python package, a shared library
+    # the delegate loader dlopen()s. This is the one piece that needs root,
+    # because it registers a udev rule granting non-root USB access:
+    curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg \
+        | sudo gpg --dearmor -o /usr/share/keyrings/coral-edgetpu.gpg
+    echo "deb [signed-by=/usr/share/keyrings/coral-edgetpu.gpg] https://packages.cloud.google.com/apt coral-edgetpu-stable main" \
+        | sudo tee /etc/apt/sources.list.d/coral-edgetpu.list
+    sudo apt-get update && sudo apt-get install -y libedgetpu1-std
 
     # A Coral USB Accelerator works on both Pi 4 and Pi 5 over USB3; plug it
     # in before starting this script. No PCIe/M.2 Coral is assumed.
@@ -22,6 +32,16 @@ Prerequisites (Raspberry Pi OS Bookworm, Pi 4 or 5):
     mkdir -p ~/labbench-pi/model && cd ~/labbench-pi/model
     curl -LO https://github.com/google-coral/test_data/raw/master/mobilenet_v2_1.0_224_quant_edgetpu.tflite
     curl -LO https://github.com/google-coral/test_data/raw/master/imagenet_labels.txt
+
+Deliberately not `pycoral`: the package PyPI serves under that name is not
+Google's real library -- it is three lines with none of the actual
+`pycoral.utils`/`pycoral.adapters` code, discovered the hard way while
+bringing this script up against a real device. The real pycoral is
+apt-only (`python3-pycoral`, from the same repo as libedgetpu above), which
+works fine on a Pi but means anyone testing off-Pi -- exactly the situation
+of developing this script at all -- hits a silent dead end. `tflite-runtime`
+plus `Interpreter.experimental_delegates=[load_delegate(...)]` is the whole
+of what pycoral wrapped, and it is a real, current PyPI package.
 
 Run it:
 
@@ -47,6 +67,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 
+import numpy as np
+
 START = time.time()
 
 try:
@@ -55,10 +77,50 @@ except ImportError:
     Picamera2 = None  # reported per-request, not fatal at import time
 
 try:
-    from pycoral.adapters import classify, common
-    from pycoral.utils.edgetpu import list_edge_tpus, make_interpreter
+    import tflite_runtime.interpreter as tflite
 except ImportError:
-    classify = common = list_edge_tpus = make_interpreter = None
+    try:
+        from tensorflow.lite.python import interpreter as tflite  # a full TF install also works
+    except ImportError:
+        tflite = None
+
+#: dlopen()'d by the delegate loader; Linux-only, matching this project's
+#: "the wire protocol is written for real servers, not every OS" scope.
+_EDGETPU_SHARED_LIB = "libedgetpu.so.1"
+
+
+def _make_interpreter(model_path: str) -> Any:
+    """The whole of what `pycoral.utils.edgetpu.make_interpreter` did: load
+    the Edge TPU delegate, hand it to a plain tflite Interpreter. Raises
+    ValueError/OSError exactly when there is no library or no device to
+    claim -- the caller turns that into "no TPU", not a crash."""
+    delegate = tflite.load_delegate(_EDGETPU_SHARED_LIB)
+    interpreter = tflite.Interpreter(model_path=model_path, experimental_delegates=[delegate])
+    interpreter.allocate_tensors()
+    return interpreter
+
+
+def _input_size(interpreter: Any) -> tuple[int, int]:
+    _, height, width, _ = interpreter.get_input_details()[0]["shape"]
+    return int(width), int(height)
+
+
+def _set_input(interpreter: Any, image: np.ndarray) -> None:
+    """`image` must already be resized to `_input_size` and in RGB order."""
+    index = interpreter.get_input_details()[0]["index"]
+    interpreter.set_tensor(index, np.expand_dims(image, axis=0))
+
+
+def _top_k_classes(interpreter: Any, top_k: int) -> list[tuple[int, float]]:
+    """(class_id, score) pairs, dequantized per the output tensor's own
+    scale/zero-point -- the quantization the model's own converter chose,
+    not a guess this script makes up."""
+    detail = interpreter.get_output_details()[0]
+    raw = interpreter.get_tensor(detail["index"])[0]
+    scale, zero_point = detail["quantization"]
+    scores = raw.astype(float) if scale == 0 else scale * (raw.astype(np.int32) - zero_point)
+    order = np.argsort(scores)[::-1][:top_k]
+    return [(int(i), float(scores[i])) for i in order]
 
 
 def read_label_file(path: str) -> dict[int, str]:
@@ -96,12 +158,16 @@ class VisionStation:
 
         self.interpreter = None
         self.labels: dict[int, str] = {}
-        can_use_tpu = model_path and make_interpreter is not None and list_edge_tpus is not None
-        if can_use_tpu and list_edge_tpus():
-            self.interpreter = make_interpreter(model_path)
-            self.interpreter.allocate_tensors()
-            if labels_path:
-                self.labels = read_label_file(labels_path)
+        if model_path and tflite is not None:
+            try:
+                self.interpreter = _make_interpreter(model_path)
+                if labels_path:
+                    self.labels = read_label_file(labels_path)
+            except (ValueError, OSError) as exc:
+                # No libedgetpu.so.1 to dlopen, or no device for it to claim --
+                # a real and expected failure mode, not a bug. Reported once,
+                # here, rather than on every classify() call.
+                print(f"warning: could not initialise the Edge TPU ({exc}); tpu_present will be false")
 
     @property
     def tpu_present(self) -> bool:
@@ -153,33 +219,32 @@ class VisionStation:
     def classify(self, top_k: int = 3) -> dict[str, Any]:
         if self.interpreter is None:
             raise RuntimeError(
-                "no Edge TPU interpreter: pycoral is not installed, no Coral device was "
-                "detected at startup, or --model was not given"
+                "no Edge TPU interpreter: tflite-runtime is not installed, libedgetpu.so.1 "
+                "is not installed, no Coral device was detected at startup, or --model was "
+                "not given"
             )
         array, path = self.capture()
-        size = common.input_size(self.interpreter)
+        size = _input_size(self.interpreter)
         try:
             from PIL import Image
 
-            resized = Image.fromarray(array).resize(size)
-            common.set_input(self.interpreter, resized)
+            resized = np.asarray(Image.fromarray(array).resize(size))
         except ImportError:
             # Nearest-neighbour fallback with no Pillow dependency -- coarser,
-            # but this script should not hard-require a package pycoral itself
-            # does not.
-            import numpy as np
-
+            # but this script should not hard-require a package the Edge TPU
+            # delegate itself does not.
             y_idx = (np.arange(size[1]) * array.shape[0] / size[1]).astype(int)
             x_idx = (np.arange(size[0]) * array.shape[1] / size[0]).astype(int)
-            common.set_input(self.interpreter, array[y_idx][:, x_idx])
+            resized = array[y_idx][:, x_idx]
+        _set_input(self.interpreter, resized)
 
         started = time.perf_counter()
         self.interpreter.invoke()
         inference_ms = (time.perf_counter() - started) * 1000.0
 
         predictions = [
-            {"label": self.labels.get(c.id, str(c.id)), "score": round(float(c.score), 4)}
-            for c in classify.get_classes(self.interpreter, top_k=top_k)
+            {"label": self.labels.get(class_id, str(class_id)), "score": round(score, 4)}
+            for class_id, score in _top_k_classes(self.interpreter, top_k)
         ]
         return {
             "predictions": predictions,
@@ -337,8 +402,8 @@ def main() -> None:
 
     if Picamera2 is None:
         print("warning: picamera2 not importable; snap/classify will report 'no camera'")
-    if args.model and make_interpreter is None:
-        print("warning: pycoral not importable; classify will report 'no Edge TPU interpreter'")
+    if args.model and tflite is None:
+        print("warning: tflite-runtime not importable; classify will report 'no Edge TPU interpreter'")
 
     station = VisionStation(
         model_path=args.model, labels_path=args.labels,

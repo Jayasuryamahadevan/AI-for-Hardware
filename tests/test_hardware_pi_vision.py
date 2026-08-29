@@ -52,31 +52,31 @@ class _FakeCamera:
         Path(path).write_bytes(b"not a real jpeg, just needs to exist")
 
 
-class _FakeClass:
-    def __init__(self, id: int, score: float) -> None:
-        self.id = id
-        self.score = score
-
-
-class _FakeCommonAdapter:
-    @staticmethod
-    def input_size(interpreter) -> tuple[int, int]:
-        return (224, 224)
-
-    @staticmethod
-    def set_input(interpreter, image) -> None:
-        pass
-
-
-class _FakeClassifyAdapter:
-    @staticmethod
-    def get_classes(interpreter, top_k: int = 3) -> list[_FakeClass]:
-        return [_FakeClass(1, 0.91), _FakeClass(2, 0.05), _FakeClass(3, 0.01)][:top_k]
-
-
 class _FakeInterpreter:
+    """A minimal stand-in for `tflite_runtime.interpreter.Interpreter`,
+    shaped exactly like the real thing's public surface -- get/set_tensor,
+    get_*_details, invoke -- since that surface, not pycoral, is what
+    `_input_size`/`_set_input`/`_top_k_classes` actually call."""
+
+    def __init__(self, output_raw: np.ndarray, quantization: tuple[float, float]) -> None:
+        self._output_raw = output_raw
+        self._quantization = quantization
+        self.last_input: np.ndarray | None = None
+
+    def get_input_details(self) -> list[dict]:
+        return [{"shape": [1, 224, 224, 3], "index": 0}]
+
+    def get_output_details(self) -> list[dict]:
+        return [{"index": 1, "quantization": self._quantization}]
+
+    def set_tensor(self, index: int, value: np.ndarray) -> None:
+        self.last_input = value
+
     def invoke(self) -> None:
         pass
+
+    def get_tensor(self, index: int) -> np.ndarray:
+        return self._output_raw[None, :]  # add the batch dimension back
 
 
 @pytest.fixture
@@ -92,8 +92,12 @@ def equipped_station(pi_module, tmp_path):
     station = pi_module.VisionStation(model_path=None, labels_path=None, image_dir=tmp_path)
     station.camera = _FakeCamera()
     station.resolution = (640, 480)
-    station.interpreter = _FakeInterpreter()
-    station.labels = {1: "coffee_mug", 2: "cup", 3: "pitcher"}
+    # Raw quantized scores at indices [0, 1, 2]; dequantized via scale=1/255,
+    # zero_point=0 they become ~[0.051, 0.910, 0.012] -- index 1 wins.
+    station.interpreter = _FakeInterpreter(
+        output_raw=np.array([13, 232, 3], dtype=np.uint8), quantization=(1 / 255, 0),
+    )
+    station.labels = {0: "background", 1: "coffee_mug", 2: "cup"}
     return station
 
 
@@ -138,14 +142,15 @@ class TestStationLogicWithFakeHardware:
         assert result["mean_brightness"] == pytest.approx(100.0, abs=0.5)
         assert result["artifact_uri"].endswith(".jpg")
 
-    def test_classify_reports_labelled_predictions(self, pi_module, equipped_station, monkeypatch):
-        monkeypatch.setattr(pi_module, "common", _FakeCommonAdapter)
-        monkeypatch.setattr(pi_module, "classify", _FakeClassifyAdapter)
+    def test_classify_reports_labelled_predictions(self, equipped_station):
         result = equipped_station.classify(top_k=2)
         assert result["predictions"] == [
-            {"label": "coffee_mug", "score": 0.91}, {"label": "cup", "score": 0.05},
+            {"label": "coffee_mug", "score": 0.9098}, {"label": "background", "score": 0.051},
         ]
         assert result["inference_ms"] >= 0.0
+        # The interpreter actually received a resized, batched tensor -- not
+        # just a mock that was never fed anything.
+        assert equipped_station.interpreter.last_input.shape == (1, 224, 224, 3)
 
 
 class TestThroughTheRealWotDriverAndGateway:
